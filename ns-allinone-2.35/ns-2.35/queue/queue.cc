@@ -41,6 +41,8 @@ static const char rcsid[] =
 #include <math.h>
 #include <stdio.h>
 
+std::ofstream Queue::ofs_queueLog;
+
 void PacketQueue::remove(Packet* target)
 {
 	for (Packet *pp= 0, *p= head_; p; pp= p, p= p->next_) {
@@ -88,11 +90,12 @@ void QueueHandler::handle(Event*)
 Queue::~Queue() {
 }
 
+
 Queue::Queue() : Connector(), blocked_(0), unblock_on_resume_(1), qh_(*this),
 		 pq_(0), 
 		 last_change_(0), /* temporarily NULL */
 		 old_util_(0), period_begin_(0), cur_util_(0), buf_slot_(0),
-		 util_buf_(NULL)
+		 util_buf_(NULL), totalQueueSize_(0), queueLogTimer_(this)
 {
 	bind("limit_", &qlim_);
 	bind("util_weight_", &util_weight_);
@@ -100,6 +103,17 @@ Queue::Queue() : Connector(), blocked_(0), unblock_on_resume_(1), qh_(*this),
 	bind_bool("unblock_on_resume_", &unblock_on_resume_);
 	bind("util_check_intv_", &util_check_intv_);
 	bind("util_records_", &util_records_);
+        //Added by Radhika
+        bind("queueLogTime_", &queueLogTime_);
+        bind("queueN1_", &queueN1_);
+        bind("queueN2_", &queueN2_);
+        bind("is_tcp_", &is_tcp_);
+        //Added by Radhika for logging
+        if(!Queue::ofs_queueLog.is_open()) {
+                ofs_queueLog.open("queuesize.txt");
+        } 
+        logTime_ = LOGINTERVAL;
+        queueLogTimer_.resched(queueLogTime_);
 
 	if (util_records_ > 0) {
 		util_buf_ = new double[util_records_];
@@ -112,6 +126,19 @@ Queue::Queue() : Connector(), blocked_(0), unblock_on_resume_(1), qh_(*this),
 		}
 	}
 }
+
+int Queue::getSeqNo (Packet* pkt) {
+
+          if(is_tcp_) {
+            hdr_tcp *th = hdr_tcp::access(pkt);
+            int seq = th->seqno();
+            return seq;
+          }
+          hdr_rtp *rh = hdr_rtp::access(pkt);
+          int seq = rh->seqno();
+          return seq;
+}
+
 
 void Queue::recv(Packet* p, Handler*)
 {
@@ -227,6 +254,24 @@ void Queue::resume()
 	}
 }
 
+void QueueLogTimer::expire(Event *e)
+{
+        module->log_queue_size();
+}
+
+void Queue::log_queue_size()
+{
+      if (Scheduler::instance().clock() >= logTime_) { 
+        double avgQueueSize = double(totalQueueSize_) * queueLogTime_ / LOGINTERVAL;
+        Queue::ofs_queueLog << Scheduler::instance().clock() << " " << queueN1_ << " " << queueN2_ << " " << avgQueueSize << "\n";
+        totalQueueSize_  = 0;
+        logTime_ = logTime_ + LOGINTERVAL;
+      }
+      totalQueueSize_ += byteLength();
+      queueLogTimer_.resched(queueLogTime_);
+}
+
+
 void Queue::reset()
 {
 	Packet* p;
@@ -234,5 +279,13 @@ void Queue::reset()
 	true_ave_ = 0.0;
 	while ((p = deque()) != 0)
 		drop(p);
+
+        totalQueueSize_ = 0;
+        //Added by Radhika for logging
+        if(!Queue::ofs_queueLog.is_open()) {
+                ofs_queueLog.open("queuesize.txt");
+        } 
+        logTime_ = LOGINTERVAL;
+        queueLogTimer_.resched(queueLogTime_);
 }
 

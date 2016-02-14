@@ -1527,6 +1527,51 @@ Simulator instproc queue-limit { n1 n2 limit } {
 	}
 }
 
+#Simulator instproc dequeue-log-id { n1 n2 logid } {
+#	$self instvar link_
+#	[$link_([$n1 id]:[$n2 id]) queue] set logid_ $logid
+#}
+
+Simulator instproc src-id { n1 n2 srcid } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set srcid_ $srcid
+}
+
+Simulator instproc queue-id { n1 n2 queueid } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set queueid_ $queueid
+}
+
+Simulator instproc queue-n1 { n1 n2 n1id } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set queueN1_ $n1id
+}
+
+Simulator instproc queue-n2 { n1 n2 n2id } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set queueN2_ $n2id
+}
+
+Simulator instproc queue-log-time { n1 n2 queueLogTime } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set queueLogTime_ $queueLogTime
+}
+
+Simulator instproc k-time { n1 n2 kTime } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set kTime_ $kTime
+}
+
+Simulator instproc interSlack { n1 n2 interSlack } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set interSlack_ $interSlack
+}
+
+Simulator instproc myBandwidth { n1 n2 myBandwidth } {
+	$self instvar link_
+	[$link_([$n1 id]:[$n2 id]) queue] set bandwidth_ $myBandwidth
+}
+
 Simulator instproc drop-trace { n1 n2 trace } {
 	$self instvar link_
 	[$link_([$n1 id]:[$n2 id]) queue] drop-target $trace

@@ -92,6 +92,12 @@ Queue set acksfirst_ false
 Queue set ackfromfront_ false
 Queue set debug_ false
 
+# Added by Radhika for queue size logging
+Queue set queueLogTime_ 100000
+Queue set queueN1_ -1
+Queue set queueN2_ -1
+Queue set is_tcp_ 0
+
 Queue/SFQ set maxqueue_ 40
 Queue/SFQ set buckets_ 16
 
@@ -263,6 +269,40 @@ Queue/SRR set maxqueuenumber_ 16
 Queue/SRR set mtu_ 1000
 Queue/SRR set granularity_ 1000
 Queue/SRR set blimit_ 25000
+
+Queue/sfqCoDel set curq_ 0.0
+Queue/sfqCoDel set d_exp_ 0.0
+Queue/sfqCoDel set interval_ 0.1
+Queue/sfqCoDel set target_ .005
+Queue/sfqCoDel set maxbins_ 1024
+Queue/sfqCoDel set quantum_ 0   
+Queue/sfqCoDel set control_packets_ 0
+Queue/sfqCoDel set sourcedest_fq_ 0                                                                                                                              
+
+
+
+#Added by Radhika
+
+Queue/randomDequeue set maxbins_ 1
+Queue/randomDequeue set curq_ 0.0
+Queue/randomDequeue set debug_ 0
+
+Queue/Lifo set maxbins_ 1
+Queue/Lifo set curq_ 0.0
+Queue/Lifo set debug_ 0
+
+Queue/edgeReplay set curq_ 0.0
+Queue/edgeReplay set debug_ 0
+Queue/edgeReplay set srcid_ -1
+Queue/edgeReplay set microsec_ 0
+
+Queue/Lstf set curq_ 0.0
+Queue/Lstf set debug_ 0
+Queue/Lstf set queueid_ -1
+Queue/Lstf set kTime_ 1000000000
+Queue/Lstf set control_packets_ 1
+Queue/Lstf set control_packets_time_ 1
+Queue/Lstf set bandwidth_ 1500000
 
 Queue/CBQ set algorithm_ 0 ;# used by compat only, not bound
 Queue/CBQ set maxpkt_ 1024
@@ -830,6 +870,9 @@ Agent set class_ 0
 Agent/Ping set packetSize_ 64
 
 Agent/UDP set packetSize_ 1000
+Agent/UDP set pct_log_ 1; #Added by Radhika
+Agent/UDP set sjfPrio_mode_ 0;  # Added by Radhika for sjf
+Agent/UDP set sjfLstf_mode_ 0;  # Added by Radhika for sjf
 Agent/UDP instproc done {} { }
 Agent/UDP instproc process_data {from data} { }
 

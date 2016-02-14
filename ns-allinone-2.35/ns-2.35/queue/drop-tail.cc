@@ -89,7 +89,7 @@ void DropTail::enque(Packet* p)
 	}
 
 	int qlimBytes = qlim_ * mean_pktsize_;
-	if ((!qib_ && (q_->length() + 1) >= qlim_) ||
+	if ((!qib_ && (q_->length()) >= qlim_) ||
   	(qib_ && (q_->byteLength() + hdr_cmn::access(p)->size()) >= qlimBytes)){
 		// if the queue would overflow if we added this packet...
 		if (drop_front_) { /* remove from head of queue */

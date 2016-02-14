@@ -55,5 +55,7 @@ public:
 		field_offset("ttl_", OFFSET(hdr_ip, ttl_));
 		field_offset("fid_", OFFSET(hdr_ip, fid_));
 		field_offset("prio_", OFFSET(hdr_ip, prio_));
+                // Added by Radhika
+		field_offset("init_slack_", OFFSET(hdr_ip, init_slack_));
 	}
 } class_iphdr;

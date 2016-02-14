@@ -39,8 +39,27 @@
 
 #include "connector.h"
 #include "packet.h"
+#include "agent.h"
 #include "ip.h"
+#include "tcp.h"
+#include "rtp.h"
+#include <fstream>
+
+#define LOGINTERVAL 0.1
+
 class Packet;
+class Queue; 
+
+//Added by Radhika for queue size logging
+class QueueLogTimer : public TimerHandler
+{
+        public:
+                QueueLogTimer(Queue *m) : TimerHandler() { module = m; }
+        protected:
+                virtual void expire(Event *e);
+                Queue* module;
+};
+
 
 class PacketQueue : public TclObject {
 public:
@@ -74,6 +93,14 @@ public:
 				return (p);
 		}
 		return (0);
+	}
+        //Added by Radhika
+	void enqueAfterPkt(Packet* p, Packet *pprev) {
+		p->next_ = pprev->next_;
+                pprev->next_ = p;
+                if (pprev == tail_) tail_ = p;
+		++len_;
+		bytes_ += hdr_cmn::access(p)->size();
 	}
 	/* remove a specific packet, which must be in the queue */
 	virtual void remove(Packet*);
@@ -118,14 +145,16 @@ private:
 	Queue& queue_;
 };
 
-
 class Queue : public Connector {
+
+static std::ofstream ofs_queueLog;  //Added by Radhika
+
 public:
 	virtual void enque(Packet*) = 0;
 	virtual Packet* deque() = 0;
 	virtual void recv(Packet*, Handler*);
 	virtual void updateStats(int queuesize); 
-	void resume();
+	virtual void resume(); // Made virtual by Radhika
 	
 	int blocked() const { return (blocked_ == 1); }
 	void unblock() { blocked_ = 0; }
@@ -142,7 +171,9 @@ public:
 	   Returns the maximum of recent measurements stored in util_buf_*/
 	double peak_utilization(void);
 	virtual ~Queue();
+        int getSeqNo(Packet*); //Added by Radhika
 protected:
+        friend class QueueLogTimer; //Added by Radhika
 	Queue();
 	void reset();
 	int qlim_;		/* maximum allowed pkts in queue */
@@ -171,6 +202,16 @@ protected:
 				   stored in memory. One slot in buffer holds
 				   period of util_check_intv_ seconds. */
 	// measuring #drops
+
+        //Added by Radhika
+        QueueLogTimer queueLogTimer_;
+        double queueLogTime_;
+        double logTime_;
+        int queueN1_;
+        int queueN2_;
+        long unsigned int totalQueueSize_;
+        void log_queue_size();
+        int is_tcp_;
 	
 };
 

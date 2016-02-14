@@ -67,8 +67,8 @@ struct hdr_ip {
 	
 	/* IPv6 */
 	int		fid_;	/* flow id */
-	int		prio_;
-
+	long long int	prio_;
+        long long int   init_slack_; //Added by Radhika
 	static int offset_;
 	inline static int& offset() { return offset_; }
 	inline static hdr_ip* access(const Packet* p) {
@@ -86,7 +86,8 @@ struct hdr_ip {
 	int& ttl() { return (ttl_); }
 	/* ipv6 fields */
 	int& flowid() { return (fid_); }
-	int& prio() { return (prio_); }
+	long long int& prio() { return (prio_); }
+	long long int& init_slack() { return (init_slack_); } //Added by Radhika
 };
 
 #endif

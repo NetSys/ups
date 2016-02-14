@@ -49,7 +49,16 @@ static const char rcsid[] =
 #include "random.h"
 #include "address.h"
 #include "ip.h"
+#include <iostream>
+#include <limits>
 
+StartMap UdpAgent::startMap;
+PctList UdpAgent::pctList;
+FctList UdpAgent::fctList;
+FlowPacketsMap UdpAgent::numPacketInFlow;
+std::ofstream UdpAgent::ofs_pcts;
+std::ofstream UdpAgent::ofs_fcts;
+double UdpAgent::log_time = LOGINTERVAL; 
 
 static class UdpAgentClass : public TclClass {
 public:
@@ -62,11 +71,54 @@ public:
 UdpAgent::UdpAgent() : Agent(PT_UDP), seqno_(-1)
 {
 	bind("packetSize_", &size_);
+	bind("pct_log_", &pct_log_);
+        bind("sjfPrio_mode_", &sjfPrio_mode_);
+        bind("sjfLstf_mode_", &sjfLstf_mode_);
+	if(!UdpAgent::ofs_pcts.is_open()) {
+		ofs_pcts.open("pcts.txt");
+	}
+	if(!UdpAgent::ofs_fcts.is_open()) {
+		ofs_fcts.open("fcts.txt");
+	}
 }
 
 UdpAgent::UdpAgent(packet_t type) : Agent(type)
 {
 	bind("packetSize_", &size_);
+	if(!UdpAgent::ofs_pcts.is_open()) {
+		ofs_pcts.open("pcts.txt");
+	}
+	if(!UdpAgent::ofs_fcts.is_open()) {
+		ofs_fcts.open("fcts.txt");
+	}
+}
+
+//Calling Destructor
+void UdpAgent::wrapup() 
+{
+       /************** Added for PCT logging **********************/
+
+        if(pct_log_) { 
+       	    for (PctList::iterator it=UdpAgent::pctList.begin(); it!=UdpAgent::pctList.end(); ++it) {
+        	UdpAgent::ofs_pcts << (*it).pct << " " << (*it).source << " " << (*it).dest 
+                                   << " " << (*it).flowid << " " << (*it).seq << " " << (*it).final_time 
+                                   << " " << (long long int) ((*it).final_time * 1000000000) << std::endl << std::flush;
+	    }
+        }
+	UdpAgent::pctList.clear();
+
+       /************************************************************/
+       /************** Added for FCT logging **********************/
+
+       	for (FctList::iterator it=UdpAgent::fctList.begin(); it!=UdpAgent::fctList.end(); ++it) {
+        	  UdpAgent::ofs_fcts << (*it).pct << " " << (*it).source << " " << (*it).dest 
+                                   << " " << (*it).flowid << " " << (*it).seq << " " << (*it).final_time 
+                                   << std::endl << std::flush;
+	}
+	UdpAgent::fctList.clear();
+
+       /************************************************************/
+
 }
 
 // put in timestamp and sequence number, even though UDP doesn't usually 
@@ -80,6 +132,8 @@ void UdpAgent::sendmsg(int nbytes, AppData* data, const char* flags)
 
 	n = nbytes / size_;
 
+        int flowsize = n; //added by Radhika
+
 	if (nbytes == -1) {
 		printf("Error:  sendmsg() for UDP should not be -1\n");
 		return;
@@ -92,8 +146,23 @@ void UdpAgent::sendmsg(int nbytes, AppData* data, const char* flags)
 	}
 
 	double local_time = Scheduler::instance().clock();
+	int flowid = -1;
+ 
 	while (n-- > 0) {
 		p = allocpkt();
+		hdr_ip *iph = hdr_ip::access(p);
+                if (flowid == -1)
+		  flowid = iph->flowid();
+                else
+                  assert(flowid == iph->flowid());
+               
+                if(sjfPrio_mode_) {
+                  iph->prio() = (long long int)(nbytes / size_);
+                }
+ 
+                if(sjfLstf_mode_) {
+                   iph->prio() = (long long int)(nbytes / size_) * 1000000000;
+                }
 		hdr_cmn::access(p)->size() = size_;
 		hdr_rtp* rh = hdr_rtp::access(p);
 		rh->flags() = 0;
@@ -105,6 +174,8 @@ void UdpAgent::sendmsg(int nbytes, AppData* data, const char* flags)
 			rh->flags() |= RTP_M;
 		p->setdata(data);
 		target_->recv(p);
+	       
+
 	}
 	n = nbytes % size_;
 	if (n > 0) {
@@ -121,10 +192,48 @@ void UdpAgent::sendmsg(int nbytes, AppData* data, const char* flags)
 		p->setdata(data);
 		target_->recv(p);
 	}
+ 
+        /************** Added for PCT logging **********************/
+        UdpAgent::startMap[flowid].arrivalTime = Scheduler::instance().clock() * 1000000000;
+        UdpAgent::startMap[flowid].maxSeq = seqno_;
+        /************************************************************/
+
+
 	idle();
 }
 void UdpAgent::recv(Packet* pkt, Handler*)
 {
+
+        /************** Added for PCT logging **********************/
+	hdr_rtp *rh = hdr_rtp::access(pkt);
+	hdr_ip *iph =  hdr_ip::access(pkt);
+
+        PacketInfo packetInfo;
+        packetInfo.source =  iph->src().addr_;
+        packetInfo.dest =  iph->dst().addr_;
+        packetInfo.flowid =  iph->flowid();
+        packetInfo.seq =  rh->seqno();
+        packetInfo.pct = (Scheduler::instance().clock() * 1000000000) - startMap[iph->flowid()].arrivalTime;
+        packetInfo.final_time =  Scheduler::instance().clock();
+        if (UdpAgent::numPacketInFlow.count(iph->flowid()) == 0) {
+          UdpAgent::numPacketInFlow[iph->flowid()] = 0;
+        }
+	UdpAgent::numPacketInFlow[iph->flowid()] = UdpAgent::numPacketInFlow[iph->flowid()] + 1;
+        UdpAgent::pctList.push_back(packetInfo);
+        
+        if(UdpAgent::numPacketInFlow[iph->flowid()] == startMap[iph->flowid()].maxSeq + 1) {
+          UdpAgent::fctList.push_back(packetInfo);
+	  UdpAgent::startMap.erase(iph->flowid());
+        }
+
+        
+        
+        if(Scheduler::instance().clock() >= UdpAgent::log_time) {
+           wrapup();
+           UdpAgent::log_time = UdpAgent::log_time + LOGINTERVAL;
+        }
+         /***********************************************************/
+
 	if (app_ ) {
 		// If an application is attached, pass the data to the app
 		hdr_cmn* h = hdr_cmn::access(pkt);
@@ -151,6 +260,13 @@ void UdpAgent::recv(Packet* pkt, Handler*)
 
 int UdpAgent::command(int argc, const char*const* argv)
 {
+        if (argc == 2) {
+		if(strcmp(argv[1], "wrapup") == 0) {
+                        wrapup();
+			return (TCL_OK);
+                }
+        }
+
 	if (argc == 4) {
 		if (strcmp(argv[1], "send") == 0) {
 			PacketData* data = new PacketData(1 + strlen(argv[3]));

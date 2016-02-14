@@ -47,12 +47,47 @@
 #include "agent.h"
 #include "trafgen.h"
 #include "packet.h"
+#include <fstream>
+#include <map>
+#include <list>
+#include <utility>
 
 //"rtp timestamp" needs the samplerate
 #define SAMPLERATE 8000
 #define RTP_M 0x0080 // marker for significant events
+#define LOGINTERVAL 0.1
+
+//Added by Radhika
+
+struct PacketInfo {
+  int source;
+  int dest;
+  int flowid;
+  int seq;
+  long long int pct;
+  double final_time;
+};
+
+struct FlowStartInfo {
+  long long int arrivalTime;
+  int maxSeq;
+};
+
+typedef std::map<int, FlowStartInfo> StartMap;
+typedef std::map<int, int> FlowPacketsMap;
+typedef std::list<PacketInfo> PctList;
+typedef std::list<PacketInfo> FctList;
 
 class UdpAgent : public Agent {
+static StartMap startMap; 
+static PctList pctList; 
+static FctList fctList; 
+static FlowPacketsMap numPacketInFlow; 
+static std::ofstream ofs_pcts;
+static std::ofstream ofs_fcts;
+static double log_time; 
+
+
 public:
 	UdpAgent();
 	UdpAgent(packet_t);
@@ -63,8 +98,13 @@ public:
 	virtual void sendmsg(int nbytes, AppData* data, const char *flags = 0);
 	virtual void recv(Packet* pkt, Handler*);
 	virtual int command(int argc, const char*const* argv);
+        virtual void wrapup();
 protected:
 	int seqno_;
+        int pct_log_;
+        int sjfPrio_mode_; 
+        int sjfLstf_mode_; 
+	std::ofstream ofs_start;
 };
 
 #endif
