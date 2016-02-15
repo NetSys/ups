@@ -309,6 +309,19 @@ Queue/Lstf set control_packets_ 1
 Queue/Lstf set control_packets_time_ 1
 Queue/Lstf set bandwidth_ 1500000
 
+Queue/finePriorities set curq_ 0.0
+Queue/finePriorities set debug_ 0
+Queue/finePriorities set queueid_ -1
+Queue/finePriorities set kTime_ 1000000000
+Queue/finePriorities set control_packets_ 0
+
+Queue/SRPT set drop_front_ false
+Queue/SRPT set summarystats_ false
+Queue/SRPT set queue_in_bytes_ false
+Queue/SRPT set mean_pktsize_ 500
+Queue/SRPT set debugme_ 0
+Queue/SRPT set queueid_ 0
+
 Queue/CBQ set algorithm_ 0 ;# used by compat only, not bound
 Queue/CBQ set maxpkt_ 1024
 CBQClass set priority_ 0

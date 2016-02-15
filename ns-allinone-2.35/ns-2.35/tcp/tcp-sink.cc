@@ -203,8 +203,10 @@ TcpSink::TcpSink(Acker* acker) : Agent(PT_ACK), acker_(acker), save_(NULL),
 #endif /* TCP_DELAY_BIND_ALL */
 
         //Radhika
-        if(!TcpSink::ofs_pcts.is_open()) {
-          ofs_pcts.open("pcts.txt");
+        if(pct_log_) {
+          if(!TcpSink::ofs_pcts.is_open()) {
+            ofs_pcts.open("pcts.txt");
+          }
         }
         codel_count_ = 0;
         codel_first_above_time_ = 0;
@@ -232,8 +234,10 @@ TcpSink::delay_bind_init_all()
 	Agent::delay_bind_init_all();
 
         //Radhika
-        if(!TcpSink::ofs_pcts.is_open()) {
-          ofs_pcts.open("pcts.txt");
+        if(pct_log_) {
+          if(!TcpSink::ofs_pcts.is_open()) {
+            ofs_pcts.open("pcts.txt");
+          }
         }
 }
 

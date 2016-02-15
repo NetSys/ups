@@ -109,8 +109,10 @@ Queue::Queue() : Connector(), blocked_(0), unblock_on_resume_(1), qh_(*this),
         bind("queueN2_", &queueN2_);
         bind("is_tcp_", &is_tcp_);
         //Added by Radhika for logging
-        if(!Queue::ofs_queueLog.is_open()) {
+        if(queueLogTime_ < 100000) {
+          if(!Queue::ofs_queueLog.is_open()) {
                 ofs_queueLog.open("queuesize.txt");
+          }
         } 
         logTime_ = LOGINTERVAL;
         queueLogTimer_.resched(queueLogTime_);
@@ -282,8 +284,10 @@ void Queue::reset()
 
         totalQueueSize_ = 0;
         //Added by Radhika for logging
-        if(!Queue::ofs_queueLog.is_open()) {
+        if(queueLogTime_ < 100000) {
+          if(!Queue::ofs_queueLog.is_open()) {
                 ofs_queueLog.open("queuesize.txt");
+          }
         } 
         logTime_ = LOGINTERVAL;
         queueLogTimer_.resched(queueLogTime_);
