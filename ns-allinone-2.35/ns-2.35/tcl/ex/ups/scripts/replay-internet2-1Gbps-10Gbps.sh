@@ -6,9 +6,6 @@
 #./remove-vestiges.sh
 cd ..
 
-for bw in 1Gbps
-do
-
 ./sim-udp-base.tcl  -simtime 10000 -gw DropTail -tcp TCP/Newreno -sink TCPSink/Sack1 -maxq 100000000 -pktsize 1460 -rcvwin 10000000 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-init.txt > replay-results/init.internet2-1Gbps-10Gbps
 
 mv pcts.txt replay-results/init.internet2-1Gbps-10Gbps.pcts
@@ -26,7 +23,7 @@ do
 	mv pcts.txt replay-results/$core.internet2-1Gbps-10Gbps-$i.pcts
 	mv fcts.txt replay-results/$core.internet2-1Gbps-10Gbps-$i.fcts
 	mv queuesize.txt replay-results/$core.internet2-1Gbps-10Gbps-$i.queuesize
-	echo "Base done"
+	echo "Original done"
 
 	python get_slacks.py replay-results/init.internet2-1Gbps-10Gbps.pcts replay-results/$core.internet2-1Gbps-10Gbps-$i.pcts replay-results/$core.internet2-1Gbps-10Gbps-$i.slacks
 
@@ -43,6 +40,5 @@ do
 
 	python compare_final_outputs_detail.py replay-results/$core.internet2-1Gbps-10Gbps-$i.pcts replay-results/lstf-$core.internet2-1Gbps-10Gbps-$i.pcts replay-results/init.internet2-1Gbps-10Gbps.pcts replay-results/$core.internet2-1Gbps-10Gbps-$i.compare replay-results/$core.internet2-1Gbps-10Gbps-$i.ratios 
 
-done
 done
 done
