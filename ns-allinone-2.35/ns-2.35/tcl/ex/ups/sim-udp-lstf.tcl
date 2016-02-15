@@ -36,7 +36,7 @@ proc Getopt {} {
 }
 
 proc create-topology {topofoldername} {
-    global ns opt nodes gw d accessrate accessdelay nshome nends ncores ntotal nlinks 
+    global ns opt nodes gw d nshome nends ncores ntotal nlinks 
 
 
     set fp [open "$topofoldername/topo.txt"]
@@ -115,7 +115,7 @@ proc create-topology {topofoldername} {
 }
 
 proc create-sources-sinks {workloadfile} {
-      global ns opt src recvapp tp protocols protosinks f nflows nends ncores nodes
+      global ns opt src recvapp tp f nflows nends ncores nodes
 
       set numsrc $nends
       set fp [open $workloadfile r]
@@ -154,16 +154,6 @@ proc create-sources-sinks {workloadfile} {
     }
 }
 
-proc create-parkinglot-topology { bneck delay } {
-    global ns opt
-    
-
-}
-
-proc create-tree-topology { bneck delay } {
-
-}
-
 proc finish {} {
     global ns opt src nflows linuxcc
     global f
@@ -185,22 +175,8 @@ if { [info exists opt(interSlack)] } {
   Queue/edgePrioFQLstf set interSlack_ $opt(interSlack)
 } 
 
-if { [info exists opt(refreshThreshold)] } {
-  Queue/edgePrioFQLstf set refresh_threshold_ $opt(refreshThreshold)
-} 
-
-if { [info exists opt(initSlack)] } {
-  Queue/edgePrioFifoPLstf set initSlack_ $opt(initSlack)
-} 
-
-
-
 if { [info exists opt(kTime)] } {
   Queue/Lstf set kTime_ $opt(kTime)
-} 
-
-if { [info exists opt(sjfLstf)] } {
-  Agent/UDP set sjfLstf_mode_ $opt(sjfLstf)
 } 
 
 create-topology $opt(topofolder)

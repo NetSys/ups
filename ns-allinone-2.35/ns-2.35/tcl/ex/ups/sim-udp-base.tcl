@@ -36,7 +36,7 @@ proc Getopt {} {
 }
 
 proc create-topology {topofoldername} {
-    global ns opt nodes gw d accessrate accessdelay nshome nends ncores ntotal nlinks 
+    global ns opt nodes gw d nshome nends ncores ntotal nlinks 
 
 
     set fp [open "$topofoldername/topo.txt"]
@@ -102,7 +102,7 @@ proc create-topology {topofoldername} {
 }
 
 proc create-sources-sinks {workloadfile} {
-      global ns opt src recvapp tp protocols protosinks f nflows nends ncores nodes
+      global ns opt src recvapp tp f nflows nends ncores nodes
 
       set numsrc $nends
       set fp [open $workloadfile r]
@@ -140,16 +140,6 @@ proc create-sources-sinks {workloadfile} {
     }
 }
 
-proc create-parkinglot-topology { bneck delay } {
-    global ns opt
-    
-
-}
-
-proc create-tree-topology { bneck delay } {
-
-}
-
 proc finish {} {
     global ns opt src nflows linuxcc
     global f
@@ -167,10 +157,6 @@ Getopt
 
 
 set ns [new Simulator]
-
-if { [info exists opt(sourcedest_fq)] } {
-  Queue/sfqCoDel set sourcedest_fq_ $opt(sourcedest_fq)
-} 
 
 if { [info exists opt(sjfPrio)] } {
   Agent/UDP set sjfPrio_mode_ $opt(sjfPrio)
