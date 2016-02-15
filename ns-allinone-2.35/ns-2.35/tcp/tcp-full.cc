@@ -849,7 +849,7 @@ FullTcpAgent::sendpacket(int seqno, int ackno, int pflags, int datalen, int reas
 	tcph->sa_length() = 0;    // may be increased by build_options()
         tcph->hlen() = tcpip_base_hdr_size_;
 	tcph->hlen() += build_options(tcph);
-
+         
 	/*
 	 * Explicit Congestion Notification (ECN) related:
 	 * Bits in header:

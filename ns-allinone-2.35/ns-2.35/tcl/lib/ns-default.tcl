@@ -1075,6 +1075,14 @@ Agent/TCP set control_increase_ 0
 Agent/TCP set SetCWRonRetransmit_ true ; # added on 2005/06/19.
 				 	 # default changed on 2008/06/05. 
 
+# DCTCP
+Agent/TCP set dctcp_ false;
+Agent/TCP set dctcp_alpha_ 0.0;
+Agent/TCP set dctcp_g_ 0.0625;
+Agent/TCP set srpt_mode_ 0;  # Added by Radhika for enabling SRPT
+Agent/TCP set sjfLstf_mode_ 0;  # Added by Radhika for enabling SJF Lstf
+Agent/TCP set sjfPrio_mode_ 0;  # Added by Radhika for enabling SJF Prio
+
 # XXX Generate nam trace or plain old text trace for variables. 
 # When it's true, generate nam trace.
 Agent/TCP set nam_tracevar_ false
@@ -1110,6 +1118,12 @@ Agent/TCPSink set RFC2581_immediate_ack_ true
 Agent/TCPSink set SYN_immediate_ack_ true ; # Added 2010/02/02
 Agent/TCPSink set bytes_ 0
 Agent/TCPSink set ecn_syn_ false ;	# Added 2005/11/21 for SYN/ACK pkts.
+#Added by Radhika
+Agent/TCPSink set pct_log_ 1
+Agent/TCPSink set codel_box_ 0
+Agent/TCPSink set codel_factor_ 4
+Agent/TCPSink set codel_target_ 0.005
+Agent/TCPSink set codel_interval_ 0.1
 
 Agent/TCPSink/DelAck set interval_ 100ms
 catch {

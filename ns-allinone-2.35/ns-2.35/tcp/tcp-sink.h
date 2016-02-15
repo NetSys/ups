@@ -39,6 +39,11 @@
 #include <math.h>
 #include "agent.h"
 #include "tcp.h"
+#include<fstream>
+#include<list>
+#include<set>
+//Radhika
+#define LOGINTERVAL 0.1
 
 /* max window size */
 // #define MWS 1024  
@@ -96,21 +101,41 @@ protected:
 	void trace(TracedVar*);
 };
 
+//Radhika
+struct PacketInfo {
+  int source;
+  int dest;
+  int flowid;
+  int seq;
+  long long int pct;
+  double final_time;
+};
+
+typedef std::list<PacketInfo> PctList;
+typedef std::set< std::pair<int, int> > PktsSeen;
+
 class TcpSink : public Agent {
 	friend class XcpSink;
+//Radhika
+static std::ofstream ofs_pcts;
+static PctList pctList;
+static double log_time;
+
 public:
 	TcpSink(Acker*);
 	void recv(Packet* pkt, Handler*);
 	void reset();
 	int command(int argc, const char*const* argv);
 	TracedInt& maxsackblocks() { return max_sack_blocks_; }
+        virtual void wrapup();
 protected:
 	void ack(Packet*);
 	virtual void add_to_ack(Packet* pkt);
 
         virtual void delay_bind_init_all();
         virtual int delay_bind_dispatch(const char *varName, const char *localName, TclObject *tracer);
-
+        double codel_control_law(double t); //added by Radhika 
+        int codel_drop(Packet *pkt); //added by Radhika
 	Acker* acker_;
 	int ts_echo_bugfix_;
 	int ts_echo_rfc1323_; 	// conforms to rfc1323 for timestamps echo
@@ -129,6 +154,21 @@ protected:
 	double lastreset_; 	/* W.N. used for detecting packets  */
 				/* from previous incarnations */
         int ecn_syn_;           /* allow SYN/ACK packets to be ECN-capable */
+
+        //Radhika
+        int pct_log_; 
+        int codel_box_;
+        int codel_factor_;
+        double codel_target_;
+        double codel_interval_;
+        int codel_count_;
+        double codel_first_above_time_;
+        int codel_dropping_;
+        double codel_drop_next_;
+        int codel_last_verdict_;
+        double codel_last_ts_;
+ 
+        PktsSeen pktsSeen; //Radhika
 
 };
 

@@ -32,6 +32,11 @@
  * SUCH DAMAGE.
  */
 
+/* 
+ * January 2013 (hari): Patched in DCTCP changes for tcp.cc from 
+ * http://simula.stanford.edu/~alizade/Site/DCTCP_files/dctcp-ns2-rev1.0.tar.gz
+ */
+
 #ifndef lint
 static const char rcsid[] =
     "@(#) $Header: /cvsroot/nsnam/ns-2/tcp/tcp.cc,v 1.182 2011/06/20 04:51:46 tom_henderson Exp $ (LBL)";
@@ -65,6 +70,8 @@ public:
 	}
 } class_tcp;
 
+FILE* TcpAgent::ofs_fcts; //Radhika
+
 TcpAgent::TcpAgent() 
 	: Agent(PT_TCP), 
 	  t_seqno_(0), dupacks_(0), curseq_(0), highest_ack_(0), 
@@ -73,7 +80,7 @@ TcpAgent::TcpAgent()
           lastreset_(0.0), closed_(0), t_rtt_(0), t_srtt_(0), t_rttvar_(0), 
 	  t_backoff_(0), ts_peer_(0), ts_echo_(0), tss(NULL), tss_size_(100), 
 	  rtx_timer_(this), delsnd_timer_(this), burstsnd_timer_(this), 
-	  first_decrease_(1), fcnt_(0), nrexmit_(0), restart_bugfix_(1), 
+	  first_decrease_(1), fcnt_(0), nrexmit_(0), restart_bugfix_(1),  
           cong_action_(0), ecn_burst_(0), ecn_backoff_(0), ect_(0), 
           use_rtt_(0), qs_requested_(0), qs_approved_(0),
 	  qs_window_(0), qs_cwnd_(0), frto_(0)
@@ -101,14 +108,23 @@ TcpAgent::TcpAgent()
         bind("necnresponses_", &necnresponses_);
         bind("ncwndcuts_", &ncwndcuts_);
 	bind("ncwndcuts1_", &ncwndcuts1_);
+	bind("dctcp_", &dctcp_);
+	bind("dctcp_alpha_", &dctcp_alpha_);
+	bind("dctcp_g_", &dctcp_g_);
 #endif /* TCP_DELAY_BIND_ALL */
+        bind("srpt_mode_", &srpt_mode_);
+        bind("sjfLstf_mode_", &sjfLstf_mode_);
+        bind("sjfPrio_mode_", &sjfPrio_mode_);
+
+       if(TcpAgent::ofs_fcts == NULL) {
+         TcpAgent::ofs_fcts = fopen("fcts.txt", "w");
+       }
 
 }
 
 void
 TcpAgent::delay_bind_init_all()
 {
-
         // Defaults for bound variables should be set in ns-default.tcl.
         delay_bind_init_one("window_");
         delay_bind_init_one("windowInit_");
@@ -123,6 +139,11 @@ TcpAgent::delay_bind_init_all()
         delay_bind_init_one("overhead_");
         delay_bind_init_one("tcpTick_");
         delay_bind_init_one("ecn_");
+	// DCTCP
+	delay_bind_init_one("dctcp_"); 
+	delay_bind_init_one("dctcp_alpha_");
+	delay_bind_init_one("dctcp_g_");
+
         delay_bind_init_one("SetCWRonRetransmit_");
         delay_bind_init_one("old_ecn_");
         delay_bind_init_one("bugfix_ss_");
@@ -190,6 +211,7 @@ TcpAgent::delay_bind_init_all()
 	delay_bind_init_one("sfrto_enabled_");
 	delay_bind_init_one("spurious_response_");
 
+
 #ifdef TCP_DELAY_BIND_ALL
 	// out because delay-bound tracevars aren't yet supported
         delay_bind_init_one("t_seqno_");
@@ -212,7 +234,9 @@ TcpAgent::delay_bind_init_all()
         delay_bind_init_one("necnresponses_");
         delay_bind_init_one("ncwndcuts_");
 	delay_bind_init_one("ncwndcuts1_");
+	
 #endif /* TCP_DELAY_BIND_ALL */
+
 
 	Agent::delay_bind_init_all();
 
@@ -234,6 +258,11 @@ TcpAgent::delay_bind_dispatch(const char *varName, const char *localName, TclObj
         if (delay_bind(varName, localName, "overhead_", &overhead_, tracer)) return TCL_OK;
         if (delay_bind(varName, localName, "tcpTick_", &tcp_tick_, tracer)) return TCL_OK;
         if (delay_bind_bool(varName, localName, "ecn_", &ecn_, tracer)) return TCL_OK;
+	// Mohammad
+        if (delay_bind_bool(varName, localName, "dctcp_", &dctcp_, tracer)) return TCL_OK; 
+	if (delay_bind(varName, localName, "dctcp_alpha_", &dctcp_alpha_ , tracer)) return TCL_OK;
+	if (delay_bind(varName, localName, "dctcp_g_", &dctcp_g_ , tracer)) return TCL_OK;
+
         if (delay_bind_bool(varName, localName, "SetCWRonRetransmit_", &SetCWRonRetransmit_, tracer)) return TCL_OK;
         if (delay_bind_bool(varName, localName, "old_ecn_", &old_ecn_ , tracer)) return TCL_OK;
         if (delay_bind_bool(varName, localName, "bugfix_ss_", &bugfix_ss_ , tracer)) return TCL_OK;
@@ -324,6 +353,7 @@ TcpAgent::delay_bind_dispatch(const char *varName, const char *localName, TclObj
         if (delay_bind(varName, localName, "necnresponses_", &necnresponses_ , tracer)) return TCL_OK;
         if (delay_bind(varName, localName, "ncwndcuts_", &ncwndcuts_ , tracer)) return TCL_OK;
  	if (delay_bind(varName, localName, "ncwndcuts1_", &ncwndcuts1_ , tracer)) return TCL_OK;
+	
 
 #endif
 
@@ -441,7 +471,7 @@ TcpAgent::reset_qoption()
 	F_counting = 0 ; 
 	W_timed = -1 ; 
 	F_full = 0 ;
-	Backoffs = 0 ; 
+	Backoffs = 0 ;
 }
 
 void
@@ -484,7 +514,12 @@ TcpAgent::reset()
 	necnresponses_ = 0;
 	ncwndcuts_ = 0;
 	ncwndcuts1_ = 0;
-        cancel_timers();      // suggested by P. Anelli.
+	
+	//Radhika
+	cumrtt_ = 0;
+	numrtt_ = 0; 
+ 
+	cancel_timers();      // suggested by P. Anelli.
 
 	if (control_increase_) {
 		prev_highest_ack_ = highest_ack_ ; 
@@ -604,7 +639,10 @@ void TcpAgent::rtt_update(double tao)
 	//
 	t_rtxcur_ = (((t_rttvar_ << (rttvar_exp_ + (T_SRTT_BITS - T_RTTVAR_BITS))) +
 		t_srtt_)  >> T_SRTT_BITS ) * tcp_tick_;
-
+	
+	//Radhika: updating cumulative rtt
+	cumrtt_ += (long long int)(t_rtt_);
+	numrtt_ += 1; 
 	return;
 }
 
@@ -687,6 +725,18 @@ void TcpAgent::output(int seqno, int reason)
 	tcph->ts_echo() = ts_peer_;
 	tcph->reason() = reason;
 	tcph->last_rtt() = int(int(t_rtt_)*tcp_tick_*1000);
+        if(srpt_mode_) {
+          if(seqno != 0)
+            iph->prio() = curseq_ - seqno;
+        }
+       if(sjfLstf_mode_) {
+          if(seqno != 0)
+            iph->prio() = (long long int)(curseq_) * 1000000000;
+        }
+       if(sjfPrio_mode_) {
+          if(seqno != 0)
+            iph->prio() = curseq_;
+        }
 
 	if (ecn_) {
 		hf->ect() = 1;	// ECN-capable transport
@@ -772,6 +822,7 @@ void TcpAgent::output(int seqno, int reason)
 
         ++ndatapack_;
         ndatabytes_ += databytes;
+
 	send(p, 0);
 	if (seqno == curseq_ && seqno > maxseq_)
 		idle();  // Tell application I have sent everything so far
@@ -805,6 +856,10 @@ void TcpAgent::sendmsg(int nbytes, const char* /*flags*/)
 		curseq_ = TCP_MAXSEQ; 
 	else
 		curseq_ += (nbytes/size_ + (nbytes%size_ ? 1 : 0));
+	
+	//Radhika added a line to find starttime
+	starttime_ = Scheduler::instance().clock();
+
 	send_much(0, 0, maxburst_);
 }
 
@@ -1297,6 +1352,8 @@ TcpAgent::slowdown(int how)
 		} else {
 			ssthresh_ = (int) decreasewin;
 		}
+	else if (how & CLOSE_SSTHRESH_DCTCP) 
+		ssthresh_ = (int) ((1 - dctcp_alpha_/2.0) * windowd());
         else if (how & THREE_QUARTER_SSTHRESH)
 		if (ssthresh_ < 3*cwnd_/4)
 			ssthresh_  = (int)(3*cwnd_/4);
@@ -1306,6 +1363,8 @@ TcpAgent::slowdown(int how)
 		if (first_decrease_ == 1 || slowstart || decrease_num_ == 0.5) {
 			cwnd_ = halfwin;
 		} else cwnd_ = decreasewin;
+	else if (how & CLOSE_CWND_DCTCP)
+		cwnd_ = (1 - dctcp_alpha_/2.0) * windowd();
         else if (how & CWND_HALF_WITH_MIN) {
 		// We have not thought about how non-standard TCPs, with
 		// non-standard values of decrease_num_, should respond
@@ -1328,7 +1387,9 @@ TcpAgent::slowdown(int how)
 	}
 	if (ssthresh_ < 2)
 		ssthresh_ = 2;
-	if (how & (CLOSE_CWND_HALF|CLOSE_CWND_RESTART|CLOSE_CWND_INIT|CLOSE_CWND_ONE))
+	if (cwnd_ < 1)
+		cwnd_ = 1;
+	if (how & (CLOSE_CWND_HALF|CLOSE_CWND_RESTART|CLOSE_CWND_INIT|CLOSE_CWND_ONE|CLOSE_CWND_DCTCP))
 		cong_action_ = TRUE;
 
 	fcnt_ = count_ = 0;
@@ -1429,7 +1490,10 @@ void TcpAgent::ecn(int seqno)
 				rtt_backoff();
 			else ecn_backoff_ = 1;
 		} else ecn_backoff_ = 0;
-		slowdown(CLOSE_CWND_HALF|CLOSE_SSTHRESH_HALF);
+ 		if (dctcp_)  
+ 			slowdown(CLOSE_CWND_DCTCP|CLOSE_SSTHRESH_DCTCP);
+ 		else
+			slowdown(CLOSE_CWND_HALF|CLOSE_SSTHRESH_HALF);
 		++necnresponses_ ;
 		// added by sylvia to count number of ecn responses 
 	}
@@ -1855,7 +1919,6 @@ void TcpAgent::timeout(int tno)
 {
 	/* retransmit timer */
 	if (tno == TCP_TIMER_RTX) {
-
 		// There has been a timeout - will trace this event
 		trace_event("TIMEOUT");
 
@@ -1957,8 +2020,12 @@ void TcpAgent::tcp_eln(Packet *pkt)
  * This function is invoked when the connection is done. It in turn
  * invokes the Tcl finish procedure that was registered with TCP.
  */
+
 void TcpAgent::finish()
 {
+	//Radhika: Printing flow finish time for logging
+        fprintf(TcpAgent::ofs_fcts, "%lld %d %d %d %d %lf %lld %lf\n", (long long int)((Scheduler::instance().clock() - starttime_) * 1000000000), addr(), daddr(), fid_, int(highest_ack_), Scheduler::instance().clock(), (long long int)(starttime_ * 1000000000), double(cumrtt_)*tcp_tick_*1000/numrtt_);
+        fflush(TcpAgent::ofs_fcts);
 	Tcl::instance().evalf("%s done", this->name());
 }
 
@@ -2182,7 +2249,7 @@ void TcpAgent::trace_event(char *eventtype)
 	char *nwrk = et_->nbuffer();
 	if (wrk != 0)
 		sprintf(wrk,
-			"E "TIME_FORMAT" %d %d TCP %s %d %d %d",
+			"E " TIME_FORMAT " %d %d TCP %s %d %d %d",
 			et_->round(Scheduler::instance().clock()),   // time
 			addr(),                       // owner (src) node id
 			daddr(),                      // dst node id
@@ -2194,7 +2261,7 @@ void TcpAgent::trace_event(char *eventtype)
 	
 	if (nwrk != 0)
 		sprintf(nwrk,
-			"E -t "TIME_FORMAT" -o TCP -e %s -s %d.%d -d %d.%d",
+			"E -t " TIME_FORMAT " -o TCP -e %s -s %d.%d -d %d.%d",
 			et_->round(Scheduler::instance().clock()),   // time
 			eventtype,                    // event type
 			addr(),                       // owner (src) node id

@@ -37,6 +37,9 @@
 
 #include "agent.h"
 #include "packet.h"
+#include <stdlib.h>
+
+#define LOGINTERVAL 0.1
 
 //class EventTrace;
 
@@ -104,7 +107,8 @@ struct hdr_tcp {
 #define CWND_HALF_WITH_MIN	0x00000200
 #define TCP_IDLE		0x00000400
 #define NO_OUTSTANDING_DATA     0x00000800
-
+#define CLOSE_SSTHRESH_DCTCP   0x00001000
+#define CLOSE_CWND_DCTCP       0x00002000
 /*
  * tcp_tick_:
  * default 0.1,
@@ -171,8 +175,11 @@ struct hstcp {
 	    cwnd_last_(0.0), increase_last_(0.0) { }
 };
 
+
 class TcpAgent : public Agent {
 	friend class XcpEndsys;
+
+static FILE* ofs_fcts; //Radhika
 public:
 	TcpAgent();
 	virtual ~TcpAgent() {free(tss);}
@@ -219,7 +226,6 @@ protected:
         int numdupacks_;	/* dup ACKs before fast retransmit */
 	int numdupacksFrac_;	/* for a larger numdupacks_ with large */
 				/* windows */
-
 	/* connection and packet dynamics */
 	virtual void output(int seqno, int reason = 0);
 	virtual void send_much(int force, int reason, int maxburst = 0);
@@ -432,6 +438,16 @@ protected:
 
 	/* Used for ECN */
 	int ecn_;		/* Explicit Congestion Notification */
+	
+	/* Use for DCTCP */
+	int dctcp_;
+	double dctcp_alpha_;
+	double dctcp_g_;
+
+        int srpt_mode_;      //Adding by Radhika for doing SRPT         
+        int sjfLstf_mode_;      //Adding by Radhika for doing SJF Lstf         
+        int sjfPrio_mode_;      //Adding by Radhika for doing SJF Prio         
+
 	int cong_action_;	/* Congestion Action.  True to indicate
 				   that the sender responded to congestion. */
         int ecn_burst_;		/* True when the previous ACK packet
@@ -536,6 +552,9 @@ protected:
 	int prev_highest_ack_ ; /* Used to determine if sender is */
 				/*  window-limited.  */
    	/* end of TCP quiescence */
+	double starttime_;      /*Radhika: starttime of flow*/
+	long long int cumrtt_;		/*Radhika: cumulative rtt*/
+	int numrtt_;		/*Radhika: number of rtt samples*/
 };
 
 /* TCP Reno */

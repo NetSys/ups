@@ -47,6 +47,11 @@ public:
 	}
 } class_tcpsink;
 
+//Radhika
+std::ofstream TcpSink::ofs_pcts;
+PctList TcpSink::pctList;
+double TcpSink::log_time;
+
 Acker::Acker() : next_(0), maxseen_(0), wndmask_(MWM), ecn_unacked_(0), 
 	ts_to_echo_(0), last_ack_sent_(0)
 {
@@ -181,6 +186,12 @@ TcpSink::TcpSink(Acker* acker) : Agent(PT_ACK), acker_(acker), save_(NULL),
 {
 	bytes_ = 0; 
 	bind("bytes_", &bytes_);
+        //Radhika
+	bind("pct_log_", &pct_log_);
+	bind("codel_box_", &codel_box_);
+	bind("codel_target_", &codel_target_);
+	bind("codel_interval_", &codel_interval_);
+	bind("codel_factor_", &codel_factor_);
 
 	/*
 	 * maxSackBlocks_ does wierd tracing things.
@@ -190,6 +201,16 @@ TcpSink::TcpSink(Acker* acker) : Agent(PT_ACK), acker_(acker), save_(NULL),
 #else /* ! TCP_DELAY_BIND_ALL */
 	bind("maxSackBlocks_", &max_sack_blocks_); // used only by sack
 #endif /* TCP_DELAY_BIND_ALL */
+
+        //Radhika
+        if(!TcpSink::ofs_pcts.is_open()) {
+          ofs_pcts.open("pcts.txt");
+        }
+        codel_count_ = 0;
+        codel_first_above_time_ = 0;
+        codel_dropping_ = 0;
+        codel_last_verdict_ = 0; 
+        codel_last_ts_ = 0; 
 }
 
 void
@@ -209,6 +230,11 @@ TcpSink::delay_bind_init_all()
 #endif /* TCP_DELAY_BIND_ALL */
 
 	Agent::delay_bind_init_all();
+
+        //Radhika
+        if(!TcpSink::ofs_pcts.is_open()) {
+          ofs_pcts.open("pcts.txt");
+        }
 }
 
 int
@@ -240,6 +266,13 @@ void Acker::update_ecn_unacked(int value)
 
 int TcpSink::command(int argc, const char*const* argv)
 {
+        //Radhika
+        if (argc == 2) {
+                if(strcmp(argv[1], "wrapup") == 0) {
+                        wrapup();
+                        return (TCL_OK);
+                }
+        }
 	if (argc == 2) {
 		if (strcmp(argv[1], "reset") == 0) {
 			reset();
@@ -257,6 +290,7 @@ int TcpSink::command(int argc, const char*const* argv)
 
 void TcpSink::reset() 
 {
+        wrapup(); //Radhika
 	acker_->reset();	
 	save_ = NULL;
 	lastreset_ = Scheduler::instance().clock(); /* W.N. - for detecting */
@@ -354,6 +388,92 @@ void TcpSink::add_to_ack(Packet*)
 	return;
 }
 
+void TcpSink::wrapup() 
+{
+  
+    //Added by Radhika (to be shifted in wrapup)
+    if(pct_log_) {
+      for (PctList::iterator it=TcpSink::pctList.begin(); it!=TcpSink::pctList.end(); ++it) {
+         TcpSink::ofs_pcts << (*it).pct << " " << (*it).source << " " << (*it).dest
+                           << " " << (*it).flowid << " " << (*it).seq << " " << (*it).final_time
+                           << " " << (long long int) ((*it).final_time * 1000000000) << std::endl << std::flush;
+      }
+    }
+    TcpSink::pctList.clear();
+}
+
+// return the time of the next drop relative to 't'
+double TcpSink::codel_control_law(double t)
+{
+    return t + (codel_interval_ / sqrt(codel_count_));
+}
+
+int TcpSink::codel_drop(Packet* pkt) {
+  hdr_tcp *th = hdr_tcp::access(pkt);
+  hdr_ip *ih = hdr_ip::access(pkt);
+  double d_exp = double(ih->init_slack() - ih->prio())/1000000000;  
+  int ok_to_drop = 0;
+  int final_verdict = 0;
+  double now = Scheduler::instance().clock(); 
+  //double now = th->ts();
+  double delay = now - th->ts();
+  if (th->ts() >= codel_last_ts_ + (codel_factor_ * codel_target_)) {
+      codel_first_above_time_ = 0;
+  }
+  codel_last_ts_ = th->ts();
+  if (d_exp < codel_target_) {
+    codel_first_above_time_ = 0;
+  } else {
+    if (codel_first_above_time_ == 0) {
+      //just went above from below. if still above at first_above_time
+      // will say it’s ok to drop
+      codel_first_above_time_ = now + codel_interval_;
+    } else if (now >= codel_first_above_time_) {
+      ok_to_drop = 1;
+    }
+  }
+  
+  if (codel_dropping_) {
+        if (! ok_to_drop) {
+            // sojourn time below target - leave dropping state
+	    //    and send this bin's packet
+            codel_dropping_ = 0;
+            codel_last_verdict_ = 0;
+        }
+        // It’s time for the next drop. Drop the current packet and dequeue
+        // the next.  If the dequeue doesn't (Radhika: next packet didn't) take us out of dropping state,
+        // schedule the next drop. A large backlog might result in drop
+        // rates so high that the next drop should happen now, hence the
+        // ‘while’ loop (Radhika -- if construct takes care of this, though timing might be a bit different).
+        else {
+            if (codel_last_verdict_) {
+              ++codel_count_;
+              double prev = codel_drop_next_;
+              codel_drop_next_ = codel_control_law(codel_drop_next_);
+	      //printf("%lf: Count = %d; drop_next = (%lf, %lf) \n", now, codel_count_, prev, codel_drop_next_); 
+            }
+            if (now >= codel_drop_next_) {
+              final_verdict = 1;
+              codel_last_verdict_ = 1;
+            } else {
+              codel_last_verdict_ = 0;
+            }
+        }
+    // If we get here we’re not in dropping state. 'ok_to_drop' means that the
+    // sojourn time has been above target for interval so enter dropping state.
+  } else if (ok_to_drop) {
+        final_verdict = 1;
+        codel_dropping_ = 1;
+        codel_last_verdict_ = 0;
+        // If min went above target close to when it last went below,
+        // assume that the drop rate that controlled the queue on the
+        // last cycle is a good starting point to control it now.
+        codel_count_ = (codel_count_ > 2 && now - codel_drop_next_ < 8*codel_interval_)? codel_count_ - 2 : 1;
+        codel_drop_next_ = codel_control_law(now);
+	//printf("%lf: Count = %d; drop_next = %lf \n", now, codel_count_, codel_drop_next_); 
+  }
+  return final_verdict;
+}
 
 void TcpSink::recv(Packet* pkt, Handler*)
 {
@@ -361,6 +481,17 @@ void TcpSink::recv(Packet* pkt, Handler*)
 	int numBytes = hdr_cmn::access(pkt)->size();
 	// number of bytes in the packet just received
 	hdr_tcp *th = hdr_tcp::access(pkt);
+	hdr_ip *ih = hdr_ip::access(pkt); //Radhika
+
+        //Added by Radhika to implement codel box
+        if(codel_box_) {
+          if(codel_drop(pkt)) {
+	        //printf("%lf: %d: Dropping packet with seq %d, with wait time = %lf\n", th->ts(), ih->flowid(), th->seqno(), (double)(ih->wait_time())/1000000000); 
+		Packet::free(pkt);
+		return;
+          }
+        }
+
 	/* W.N. Check if packet is from previous incarnation */
 	if (th->ts() < lastreset_) {
 		// Remove packet and do nothing
@@ -378,6 +509,30 @@ void TcpSink::recv(Packet* pkt, Handler*)
 		bytes_ += numToDeliver;
 		recvBytes(numToDeliver);
 	}
+
+
+        
+
+        //Added by Radhika for pct logging
+        if(HDR_CMN(pkt)->size() >= 1460) {
+          if(pktsSeen.find(std::make_pair(ih->flowid(), th->seqno())) == pktsSeen.end()) {
+             PacketInfo packetInfo;
+             packetInfo.source = ih->saddr();
+             packetInfo.dest = ih->daddr();
+             packetInfo.flowid =  ih->flowid();
+             packetInfo.seq =  th->seqno();
+             packetInfo.pct = (long long int) ((Scheduler::instance().clock() * 1000000000) - (th->ts() * 1000000000));
+             packetInfo.final_time =  Scheduler::instance().clock(); 
+             pktsSeen.insert(std::make_pair(ih->flowid(), th->seqno()));  
+             TcpSink::pctList.push_back(packetInfo);
+           
+          }
+        }
+        if(Scheduler::instance().clock() >= TcpSink::log_time) {
+           wrapup();
+           TcpSink::log_time = TcpSink::log_time + LOGINTERVAL;
+        }
+
 	// send any packets to the application
       	ack(pkt);
 	// ACK the packet
