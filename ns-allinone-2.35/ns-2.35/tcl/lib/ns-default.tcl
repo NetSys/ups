@@ -296,6 +296,11 @@ Queue/edgeReplay set debug_ 0
 Queue/edgeReplay set srcid_ -1
 Queue/edgeReplay set microsec_ 0
 
+Queue/edgeTailPktDelayLstf set curq_ 0.0
+Queue/edgeTailPktDelayLstf set debug_ 0
+Queue/edgeTailPktDelayLstf set srcid_ -1
+Queue/edgeTailPktDelayLstf set initSlack_ 1
+
 Queue/Lstf set curq_ 0.0
 Queue/Lstf set debug_ 0
 Queue/Lstf set queueid_ -1
