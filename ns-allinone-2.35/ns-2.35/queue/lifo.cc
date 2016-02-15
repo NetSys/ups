@@ -72,12 +72,11 @@ Packet* LifoQueue::deque()
        {
 	  Packet *pkt = (bin_[0].q_)->tail();
 	  (bin_[0].q_)->remove(pkt);
-          hdr_rtp *rh = hdr_rtp::access(pkt);
           hdr_ip *iph = hdr_ip::access(pkt);
           curlen_--;
           curq_ -= HDR_CMN(pkt)->size();
 	  if(debug_)
-            printf("Lifo: Dequing packet from flow with id %d, slack %d, seqno = %d, size = %d from queue with curlen = %d\n", iph->flowid(), iph->prio(), rh->seqno(), HDR_CMN(pkt)->size(), curlen_); 
+            printf("Lifo: Dequing packet from flow with id %d, slack %d, seqno = %d, size = %d from queue with curlen = %d\n", iph->flowid(), iph->prio(), getSeqNo(pkt), HDR_CMN(pkt)->size(), curlen_); 
 	  return pkt;
        }
        return 0;
