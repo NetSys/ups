@@ -184,7 +184,7 @@ if { [info exists opt(control_packets)] } {
 }
 
 if { [info exists opt(interSlack)] } {
-  Queue/edgePrioFQLstf set interSlack_ $opt(interSlack)
+  Queue/edgeFQLstf set interSlack_ $opt(interSlack)
 } 
 
 if { [info exists opt(sjfLstf)] } {

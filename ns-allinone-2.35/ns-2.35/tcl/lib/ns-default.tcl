@@ -301,6 +301,11 @@ Queue/edgeTailPktDelayLstf set debug_ 0
 Queue/edgeTailPktDelayLstf set srcid_ -1
 Queue/edgeTailPktDelayLstf set initSlack_ 1
 
+Queue/edgeFQLstf set curq_ 0.0
+Queue/edgeFQLstf set debug_ 0
+Queue/edgeFQLstf set srcid_ -1
+Queue/edgeFQLstf set interSlack_ 0
+
 Queue/Lstf set curq_ 0.0
 Queue/Lstf set debug_ 0
 Queue/Lstf set queueid_ -1
