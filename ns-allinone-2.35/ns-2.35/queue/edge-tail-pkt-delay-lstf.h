@@ -1,9 +1,7 @@
-/*
- * edgeReplayQueue - Simple label based priority queue
- */
+/* Assigning slack for tail packet delay*/
 
-#ifndef ns_edgereplay_h
-#define ns_edgereplay_h
+#ifndef ns_edgetailpktdelaylstf_h
+#define ns_edgetailpktdelaylstf_h
 
 #include "queue.h"
 #include <stdlib.h>
@@ -18,19 +16,14 @@ struct bindesc {
 	int index;
 } ;
 
-struct Slack {
-  long long int deadline;
-  long long int arrival_time;
-} ;
 
-typedef std::map<std::pair<int, int>, Slack> SlackMap;
 
-class edgeReplayQueue : public Queue {
+class edgeTailPktDelayLstfQueue : public Queue {
   public:   
-    edgeReplayQueue();
-
+    edgeTailPktDelayLstfQueue();
 
   protected:
+    // Stuff specific to the CoDel algorithm
     void enque(Packet* pkt);
     int dropPacket(int pr);
     Packet* deque();
@@ -39,11 +32,9 @@ class edgeReplayQueue : public Queue {
 
     int curlen_;	    // the total occupancy of all bins in packets
     int debug_;
-    SlackMap slack_map;
     int srcid_;
-    int microsec_;
+    double initSlack_;
 
-    // NS-specific junk
     int command(int argc, const char*const* argv);
     void reset();
     void trace(TracedVar*); // routine to write trace records

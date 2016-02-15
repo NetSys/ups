@@ -2,8 +2,8 @@
  * LstfQueue 
  */
 
-#ifndef ns_corepriobulk_h
-#define ns_corepriobulk_h
+#ifndef ns_lstf_h
+#define ns_lstf_h
 
 #include "queue.h"
 #include <stdlib.h>
