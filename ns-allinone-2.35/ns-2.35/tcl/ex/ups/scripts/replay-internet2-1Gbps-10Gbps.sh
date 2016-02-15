@@ -6,7 +6,7 @@
 #./remove-vestiges.sh
 cd ..
 
-./sim-udp-base.tcl  -simtime 10000 -gw DropTail -tcp TCP/Newreno -sink TCPSink/Sack1 -maxq 100000000 -pktsize 1460 -rcvwin 10000000 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-init.txt > replay-results/init.internet2-1Gbps-10Gbps
+./sim-udp-base.tcl  -simtime 10000 -gw DropTail -maxq 100000000 -pktsize 1460 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-init.txt > replay-results/init.internet2-1Gbps-10Gbps
 
 mv pcts.txt replay-results/init.internet2-1Gbps-10Gbps.pcts
 mv fcts.txt replay-results/init.internet2-1Gbps-10Gbps.fcts
@@ -18,7 +18,7 @@ for core in randomDequeue DropTail Lifo sfqCoDel
 do
 	
 
-	./sim-udp-base.tcl  -simtime 1 -gw $core -tcp TCP/Newreno -sink TCPSink/Sack1 -maxq 100000000 -pktsize 1460 -queueLogTime 0.00001 -rcvwin 10000000 -codel_target 1000.0 -maxbins 1024 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-$i.txt > replay-results/$core.internet2-1Gbps-10Gbps-$i
+	./sim-udp-base.tcl  -simtime 1 -gw $core -maxq 100000000 -pktsize 1460 -codel_target 1000.0 -maxbins 1024 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-$i.txt > replay-results/$core.internet2-1Gbps-10Gbps-$i
 	
 	mv pcts.txt replay-results/$core.internet2-1Gbps-10Gbps-$i.pcts
 	mv fcts.txt replay-results/$core.internet2-1Gbps-10Gbps-$i.fcts
@@ -30,7 +30,7 @@ do
         wc -l < replay-results/$core.internet2-1Gbps-10Gbps-$i.slacks > slacks.txt
         cat replay-results/$core.internet2-1Gbps-10Gbps-$i.slacks >> slacks.txt
 	        
-	./sim-udp-lstf.tcl  -simtime 1 -gw edgeReplay -tcp TCP/Newreno -sink TCPSink/Sack1 -maxq 100000000 -pktsize 1460 -queueLogTime 0.00001 -rcvwin 10000000 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-$i.txt > replay-results/lstf-$core.internet2-1Gbps-10Gbps-$i
+	./sim-udp-lstf.tcl  -simtime 1 -gw edgeReplay -maxq 100000000 -pktsize 1460 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-$i.txt > replay-results/lstf-$core.internet2-1Gbps-10Gbps-$i
         mv pcts.txt replay-results/lstf-$core.internet2-1Gbps-10Gbps-$i.pcts
         mv fcts.txt replay-results/lstf-$core.internet2-1Gbps-10Gbps-$i.fcts
         mv queuesize.txt replay-results/lstf-$core.internet2-1Gbps-10Gbps-$i.queuesize
