@@ -18,28 +18,28 @@ Instructions for reproducing UPS results on the default scenario (Internet2 1Gbp
 
 
 #### LSTF replay for Random, FIFO, LIFO and FQ
-Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/replay-internet2-1Gbps-10Gbps.sh
-Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/replay-results
+- Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/replay-internet2-1Gbps-10Gbps.sh
+- Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/replay-results
 
 #### Mean FCTs
-Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/meanfcts-tcp-internet2-1Gbps-10Gbps.sh
-Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/meanfcts-results
+- Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/meanfcts-tcp-internet2-1Gbps-10Gbps.sh
+- Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/meanfcts-results
 
 #### Tail Packet Delays
-Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/tail-pkt-delays-internet2-1Gbps-10Gbps.sh
-Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/tail-pkt-delays-results
+- Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/tail-pkt-delays-internet2-1Gbps-10Gbps.sh
+- Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/tail-pkt-delays-results
 
 #### Long-lived fairness
-Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-longlived-internet2-10Gbps-10Gbps.sh
-Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/longlived/
+- Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-longlived-internet2-10Gbps-10Gbps.sh
+- Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/longlived/
 
 #### Short-term fairness
-Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-shortterm-internet2-1Gbps-10Gbps.sh  
-Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/shortterm/
+- Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-shortterm-internet2-1Gbps-10Gbps.sh  
+- Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/shortterm/
 
 #### AQM: FQ-CoDel
-Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fqcodel-internet2-1Gbps-10Gbps.sh
-Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fqcodel-results/
+- Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fqcodel-internet2-1Gbps-10Gbps.sh
+- Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fqcodel-results/
 
 Please contact me at radhika @ eecs dot berkeley dot edu
 - if you would like to run experiments under more scenarios as done in the paper. We can send you the workloads and topologies we used, along with further instructions.
