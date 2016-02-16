@@ -20,7 +20,7 @@ do
         # Edge CoDel with LSTF (FQ slack assignment with r_est = 100Mbps)
   for interSlack in 116800
   do
-	./sim-tcp-lstf.tcl -simtime 10 -gw edgePrioFQLstf -tcp TCP/Newreno -sink TCPSink/Sack1 -maxq $buf -pktsize 1460 -rcvwin 10000000 -codel_box 1 -codel_box_target 0.005 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-$i.txt -control_packets 0 -pct_log 0  -interSlack $interSlack > fqcodel-results/codelboxFQLstf5ms-$interSlack.internet2-1Gbps-10Gbps-tcp-buf-$buf-$i
+	./sim-tcp-lstf.tcl -simtime 10 -gw edgeFQLstf -tcp TCP/Newreno -sink TCPSink/Sack1 -maxq $buf -pktsize 1460 -rcvwin 10000000 -codel_box 1 -codel_box_target 0.005 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-$i.txt -control_packets 0 -pct_log 0  -interSlack $interSlack > fqcodel-results/codelboxFQLstf5ms-$interSlack.internet2-1Gbps-10Gbps-tcp-buf-$buf-$i
         mv fcts.txt fqcodel-results/codelboxFQLstf5ms-$interSlack.internet2-1Gbps-10Gbps-tcp-buf-$buf-$i.fcts
   done
 
