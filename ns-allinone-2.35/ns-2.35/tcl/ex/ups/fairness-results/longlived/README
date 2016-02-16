@@ -1,0 +1,19 @@
+Schemes:
+1. fifo
+2. fq
+3. fqLstf-11680 (LSTF with slack initialization for FQ, $r_est$ = 1Gbps)
+4. fqLstf-23360 (LSTF with slack initialization for FQ, $r_est$ = 500Mbps)
+5. fqLstf-116800 (LSTF with slack initialization for FQ, $r_est$ = 100Mbps)
+6. fqLstf-233600 (LSTF with slack initialization for FQ, $r_est$ = 50Mbps)
+7. fqLstf-1168000 (LSTF with slack initialization for FQ, $r_est$ = 10Mbps)
+
+Logs stored (replace <scheme> with a scheme name listed above):
+1. <scheme>.internet2-10Gbps-10Gbps-tcp-buf-34250-fq-5ms.pcts: Packet Completion Times (or Packet Delay) obtained for <scheme>
+Format: <PCT in ns> <source id> <dest id> <flow id> <seqno> <time when packet reaches dest in sec> <time when packet reaches dest in ns>
+2. <scheme>.internet2-10Gbps-10Gbps-tcp-buf-34250-fq-5ms.fcts: FCTs obtained for <scheme>
+This is empty for long-lived fairness experiment, since no flow completes
+
+Computed results (replace <scheme> with a scheme name listed above):
+1. fairness-<scheme>-internet2-10Gbps-10Gbps-tcp-buf-34250-fq-5ms: Jain's fairness index after every ms.
+
+Scripts used for computing results from logs: findFairness-per1ms.py called by get-fairness-perMs.sh (which in turn is called by the main script in tcl/ex/ups/scripts)
