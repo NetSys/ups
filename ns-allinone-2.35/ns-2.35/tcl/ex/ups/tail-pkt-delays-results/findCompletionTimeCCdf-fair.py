@@ -48,6 +48,7 @@ outfile2_ccdf.write("0.1 " + str(numpy.percentile(times2, (100-0.1))) + "\n")
 for i in xrange(1,100):
   outfile2_ccdf.write(str(i) + " " + str(numpy.percentile(times2, int(100 - i))) + "\n")
 
+outfile3.write(str(sum(times1)/len(times1)) + "\n")
 outfile4.write(str(sum(times2)/len(times2)) + "\n")
 
 
