@@ -42,6 +42,6 @@ Instructions for reproducing UPS results on the default scenario (Internet2 1Gbp
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fqcodel-results/
 
 Please contact me at radhika @ eecs dot berkeley dot edu
-- if you would like to run experiments under more scenarios as done in the paper. We can send you the workloads and topologies we used, along with further instructions.
+- if you would like to run experiments under more scenarios as done in the paper. I can send you the required workloads and topologies, along with further instructions.
 - if you happen to find a bug!
 - if you have any other questions
