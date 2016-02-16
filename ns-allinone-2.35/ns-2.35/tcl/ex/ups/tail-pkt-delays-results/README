@@ -3,10 +3,10 @@ Schemes:
 2. tailPktDelayLstf (LSTF with all packets initialized with the same slack value)
 
 Logs stored (replace <scheme> with a scheme name listed above):
-1. <scheme>.internet2-1Gbps-10Gbps-70.pcts and lstf-<scheme>.internet2-1Gbps-10Gbps-70.pct: Packet Completion Times (or Packet Delay) obtained for <scheme> and its LSTF replay respectively.
+1. <scheme>.internet2-1Gbps-10Gbps-70.pcts: Packet Completion Times (or Packet Delay) obtained for <scheme>
 Format: <PCT in ns> <source id> <dest id> <flow id> <seq in no.of packets> <time when packet reaches dest in sec> <time when packet reaches dest in ns>
-2. <scheme>.internet2-1Gbps-10Gbps-70.fcts and lstf-<scheme>.internet2-1Gbps-10Gbps-70.fcts: FCTs obtained for <scheme> and its LSTF replay respectively.
-Format: <FCT in ns> <source id> <dest id> <flow id> <no. of packets in flow - 1> <time when packet reaches dest in sec> 
+2. <scheme>.internet2-1Gbps-10Gbps-70.fcts: FCTs obtained for <scheme> 
+Format: <FCT in ns> <source id> <dest id> <flow id> <no. of packets in flow - 1> <time when flow finishes in sec> 
 
 Computed results (replace <scheme> with a scheme name listed above):
 1. fair-ccdf-pct-<scheme>.internet2-1Gbps-10Gbps-70-ccdf: Complementary CDF of packet delays with scheme

@@ -1,0 +1,16 @@
+Schemes:
+1. fifo
+2. srpt
+3. sjfPrio 
+4. sjfLstf
+
+Logs stored (replace <scheme> with a scheme name listed above):
+2. <scheme>.internet2-1Gbps-10Gbps-tcp-buf-3425-70.fcts: FCTs obtained for <scheme>.
+Format: <FCT in ns> <source id> <dest id> <flow id> <no. of packets in the flow> <time when flow finishes in sec> <time when flow starts in ns> <avg. RTT for the flow>
+
+Computed results (replace <scheme> with a scheme name listed above) -- refer to findavg-fair.py for more details:
+1. averages/<scheme>.internet2-1Gbps-10Gbps-tcp-buf-3425-70: avg FCTs and FCTs at various percentiles, bucketed by flow size
+2. averages/bulk-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-3425-70: avg FCTs and FCTs at various percentiles, across all flows
+3. averages/weighted-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-3425-70: avg FCTs and FCTs at various percentiles, across bytes
+
+Scripts used for computing results from logs: findavg-fair.py called by getaverage.sh (which in turn is called by the main script in tcl/ex/ups/scripts)
