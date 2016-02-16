@@ -14,8 +14,9 @@ Instructions for reproducing UPS results on the default scenario (Internet2 1Gbp
 9. make clean; make 
 10. Scripts to run various experiments can be found in ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts. All scripts should be run from this directory.
 11. Results for various experiments get stored in specific directories in ns-allinone-2.35/ns-2.35/tcl/ex/ups/
-12. The scripts and results directory for various experiments are listed below. Specific details about result format can be found in the README files in the specific result directory.
 
+
+The scripts and results directories for various experiments are listed below. Specific details about result format can be found in the README files in the specific result directory.
 
 #### LSTF replay for Random, FIFO, LIFO and FQ
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/replay-internet2-1Gbps-10Gbps.sh
