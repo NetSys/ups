@@ -45,10 +45,10 @@ do
 
         # compare original and replay pcts (Packet Completion Times)
 	python compare_final_outputs_detail.py replay-results/$core.internet2-1Gbps-10Gbps-$util.pcts replay-results/lstf-$core.internet2-1Gbps-10Gbps-$util.pcts replay-results/init.internet2-1Gbps-10Gbps.pcts replay-results/$core.internet2-1Gbps-10Gbps-$util.compare replay-results/$core.internet2-1Gbps-10Gbps-$util.ratios 
-      
-        # find % of packets delayed 
-        cd replay-results
-        ./get-num-late-packets.sh
 
 done
 done
+
+# find % of packets delayed 
+cd replay-results
+./get-num-late-packets.sh

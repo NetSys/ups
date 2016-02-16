@@ -22,8 +22,8 @@ do
         mv pcts.txt fairness-results/longlived/fqLstf-$interSlack.internet2-10Gbps-10Gbps-tcp-buf-$buf-fq-5ms.pcts
         mv fcts.txt fairness-results/longlived/fqLstf-$interSlack.internet2-10Gbps-10Gbps-tcp-buf-$buf-fq-5ms.fcts
     done
-
-   cd fairness-results/longlived/
-   ./get-fairness-perMs.sh
-
 done
+
+#compute fairness per ms
+cd fairness-results/longlived/
+./get-fairness-perMs.sh
