@@ -33,10 +33,10 @@ if __name__ == "__main__":
   input_files = list()
   try:
     for arg in sys.argv[1:-3]:
-      input_files.append(open("1." + arg + "." + sys.argv[-3] + ".fcts"))
-      print "Opened 1." + arg + "." + sys.argv[-3] + ".fcts"
+      input_files.append(open(arg + "." + sys.argv[-3] + ".fcts"))
+      print "Opened " + arg + "." + sys.argv[-3] + ".fcts"
   except:
-    print "Error opening 1." + arg + "." + sys.argv[-3] + ".fcts"
+    print "Error opening " + arg + "." + sys.argv[-3] + ".fcts"
     sys.exit(1)
 
   fcts_list = list()
