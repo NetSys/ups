@@ -25,7 +25,6 @@ do
 	
 	mv pcts.txt replay-results/$core.internet2-1Gbps-10Gbps-$util.pcts
 	mv fcts.txt replay-results/$core.internet2-1Gbps-10Gbps-$util.fcts
-	mv queuesize.txt replay-results/$core.internet2-1Gbps-10Gbps-$util.queuesize
 	echo "Original done"
 
         # get slacks
@@ -38,7 +37,6 @@ do
 	./sim-udp-lstf.tcl  -simtime 1 -gw edgeReplay -maxq 100000000 -pktsize 1460 -topofolder scenarios/internet2-1Gbps-10Gbps -workloadfile workload-$util.txt > replay-results/lstf-$core.internet2-1Gbps-10Gbps-$util
         mv pcts.txt replay-results/lstf-$core.internet2-1Gbps-10Gbps-$util.pcts
         mv fcts.txt replay-results/lstf-$core.internet2-1Gbps-10Gbps-$util.fcts
-        mv queuesize.txt replay-results/lstf-$core.internet2-1Gbps-10Gbps-$util.queuesize
 	echo "LSTF done"
 
         rm slacks.txt
