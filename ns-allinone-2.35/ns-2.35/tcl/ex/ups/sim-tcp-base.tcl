@@ -169,6 +169,15 @@ if { [info exists opt(sjfPrio)] } {
   Agent/TCP set sjfPrio_mode_ $opt(sjfPrio)
 } 
 
+if { [info exists opt(codel_target)] } {
+  Queue/sfqCoDel set target_ $opt(codel_target)
+}
+if { [info exists opt(maxbins)] } {
+  Queue/sfqCoDel set maxbins_ $opt(maxbins)
+}
+
+
+
 Agent/TCP set tcpTick_ .000001
 Agent/TCP set timestamps_ true
 

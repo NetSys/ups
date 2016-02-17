@@ -146,6 +146,13 @@ proc create-sources-sinks {workloadfile} {
                         if { [info exists opt(pct_log)] } {
         		  $tcpsink($j) set pct_log_ $opt(pct_log)
                         } 
+                        if { [info exists opt(codel_box)] } {
+                          $tcpsink($j) set codel_box_ $opt(codel_box)
+                        } 
+                        if { [info exists opt(codel_box_target)] } {
+                          $tcpsink($j) set codel_target_ $opt(codel_box_target)
+                        } 
+
                         set src($j) [ $tcpsrc($j) attach-app FTP/OptSender  ]
                         $src($j) setup_and_start 0 $j $tcpsrc($j) $flowsize $sendtime
                         $ns at $opt(simtime) "$tcpsink($j) wrapup"
