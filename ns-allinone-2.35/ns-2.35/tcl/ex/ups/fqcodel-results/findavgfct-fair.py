@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     avg = sum(fctsweighted)/sum(sizes)
     length = len(fctsweighted)
-    f3.write("avg_over_bytes" + "\t" + str(length) + "\n")
+    f3.write("avg_over_bytes" + "\t" + str(avg) + "\t" + str(length) + "\n")
   
     f1.close()
     f2.close()

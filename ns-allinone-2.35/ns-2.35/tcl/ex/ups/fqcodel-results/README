@@ -9,11 +9,13 @@ Logs stored (replace <scheme> with a scheme name listed above):
 Format: <FCT in nanoseconds> <source id> <dest id> <flow id> <no. of packets in the flow> <time when flow finishes in sec> <time when flow starts in nanoseconds> <avg. RTT for the flow in ms>
 
 Computed results (replace <scheme> with a scheme name listed above) -- refer to findavgfct-fair.py and findavgdelay-fair.py for more details:
-1. avgfcts/<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs and FCTs at various percentiles, bucketed by flow size
-2. avgfcts/bulk-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs and FCTs at various percentiles, across all flows
-3. avgfcts/weighted-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs across bytes
-4. avgdelays/<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs and RTTs at various percentiles, bucketed by flow size
-5. avgdelays/bulk-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs and RTTs at various percentiles, across all flows
-6. avgdelays/weighted-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs across packets
+1. avgfcts/<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs and FCTs at various percentiles, for each flow size
+2. avgfcts/bucket-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs and FCTs at various percentiles, for different flow size buckets
+3. avgfcts/bulk-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs and FCTs at various percentiles, across all flows
+4. avgfcts/weighted-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs across bytes
+5. avgdelays/<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs and RTTs at various percentiles, for each flow size
+6. avgdelays/bucket-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs and RTTs at various percentiles, for different flow size buckets
+7. avgdelays/bulk-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs and RTTs at various percentiles, across all flows
+8. avgdelays/weighted-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs across packets
 
 Scripts used for computing results from logs: findavgfct-fair.py and findavgdelay-fair.py called by getaverage.sh (which in turn is called by the main script in tcl/ex/ups/scripts)
