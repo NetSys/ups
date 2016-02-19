@@ -8,8 +8,8 @@ Schemes:
 7. fqLstf-1168000 (LSTF with slack initialization for FQ, $r_est$ = 10Mbps)
 
 Logs stored (replace <scheme> with a scheme name listed above):
-1. <scheme>.internet2-10Gbps-10Gbps-tcp-buf-34250-fq-5ms.pcts: Packet Completion Times (or Packet Delay) obtained for <scheme>
-Format: <PCT in ns> <source id> <dest id> <flow id> <seqno> <time when packet reaches dest in sec> <time when packet reaches dest in ns>
+1. <scheme>.internet2-10Gbps-10Gbps-tcp-buf-34250-fq-5ms.pcts: Packet Completion Times (or Packet Delays) obtained for <scheme>
+Format: <PCT in nanoseconds> <source id> <dest id> <flow id> <seqno> <time when packet reaches dest in sec> <time when packet reaches dest in nanoseconds>
 2. <scheme>.internet2-10Gbps-10Gbps-tcp-buf-34250-fq-5ms.fcts: FCTs obtained for <scheme>
 This is empty for long-lived fairness experiment, since no flow completes
 

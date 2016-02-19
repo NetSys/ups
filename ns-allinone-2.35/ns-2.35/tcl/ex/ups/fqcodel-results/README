@@ -1,0 +1,19 @@
+Schemes:
+1. fifo
+2. fq
+3. fqcodel5ms (FQ-CoDel with target 5ms)
+7. codelboxFQLstf5ms-116800 (LSTF with slack initialization for FQ, $r_est$ = 100Mbps, running in conjunction with Edge CoDel having a target of 5ms)
+
+Logs stored (replace <scheme> with a scheme name listed above):
+1. <scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70.fcts: FCTs obtained for <scheme>.
+Format: <FCT in nanoseconds> <source id> <dest id> <flow id> <no. of packets in the flow> <time when flow finishes in sec> <time when flow starts in nanoseconds> <avg. RTT for the flow in ms>
+
+Computed results (replace <scheme> with a scheme name listed above) -- refer to findavgfct-fair.py and findavgdelay-fair.py for more details:
+1. avgfcts/<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs and FCTs at various percentiles, bucketed by flow size
+2. avgfcts/bulk-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs and FCTs at various percentiles, across all flows
+3. avgfcts/weighted-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg FCTs across bytes
+4. avgdelays/<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs and RTTs at various percentiles, bucketed by flow size
+5. avgdelays/bulk-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs and RTTs at various percentiles, across all flows
+6. avgdelays/weighted-<scheme>.internet2-1Gbps-10Gbps-tcp-buf-34250-70: avg RTTs across packets
+
+Scripts used for computing results from logs: findavgfct-fair.py and findavgdelay-fair.py called by getaverage.sh (which in turn is called by the main script in tcl/ex/ups/scripts)

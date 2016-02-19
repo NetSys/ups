@@ -135,12 +135,8 @@ if __name__ == "__main__":
     f2.write("avg_over_flows" + "\t" + str(avg) + "\t" + str(med) + "\t" + str(perc99) + "\t" + str(perc1) + "\t" + str(perc10) + "\t" + str(length) + "\n")
 
     avg = sum(fctsweighted)/sum(sizes)
-    med = numpy.percentile(fctsweighted, int(50))
-    perc99 = numpy.percentile(fctsweighted, int(99))
-    perc1 = numpy.percentile(fctsweighted, int(1))
-    perc10 = numpy.percentile(fctsweighted, int(10))
     length = len(fctsweighted)
-    f3.write("avg_over_bytes" + "\t" + str(avg) + "\t" + str(med) + "\t" + str(perc99) + "\t" + str(perc1) + "\t" + str(perc10) + "\t" + str(length) + "\n")
+    f3.write("avg_over_bytes" + "\t" + str(length) + "\n")
   
     f1.close()
     f2.close()

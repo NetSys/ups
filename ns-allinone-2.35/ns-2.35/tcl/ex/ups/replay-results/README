@@ -5,10 +5,10 @@ Schemes:
 4. sfqCoDel (FQ)
 
 Logs stored (replace <scheme> with a scheme name listed above):
-1. <scheme>.internet2-1Gbps-10Gbps-70.pcts and lstf-<scheme>.internet2-1Gbps-10Gbps-70.pct: Packet Completion Times (or Packet Delay) obtained for <scheme> and its LSTF replay respectively.
-Format: <PCT in ns> <source id> <dest id> <flow id> <seq in no.of packets> <time when packet reaches dest in sec> <time when packet reaches dest in ns>
+1. <scheme>.internet2-1Gbps-10Gbps-70.pcts and lstf-<scheme>.internet2-1Gbps-10Gbps-70.pcts: Packet Completion Times (or Packet Delays) obtained for <scheme> and its LSTF replay respectively.
+Format: <PCT in nanoseconds> <source id> <dest id> <flow id> <seq in no.of packets> <time when packet reaches dest in sec> <time when packet reaches dest in nanoseconds>
 2. <scheme>.internet2-1Gbps-10Gbps-70.fcts and lstf-<scheme>.internet2-1Gbps-10Gbps-70.fcts: FCTs obtained for <scheme> and its LSTF replay respectively.
-Format: <FCT in ns> <source id> <dest id> <flow id> <no. of packets in flow - 1> <time when flow finishes in sec> 
+Format: <FCT in nanoseconds> <source id> <dest id> <flow id> <no. of packets in flow - 1> <time when flow finishes in sec> 
 3. <scheme>.internet2-1Gbps-10Gbps-70.compare: List of packets that miss their target output times when replaying a <scheme>
 Format: <flowid> <seq in no. of packets> : <congestion free PCT> <PCT with LSTF> >  <original PCT> by <Difference between the two PCTs>
 4. <scheme>.internet2-1Gbps-10Gbps-70.ratios: Ratio of queuing delay with LSTF and with original <scheme>.

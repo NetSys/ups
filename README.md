@@ -16,31 +16,37 @@ Instructions for reproducing UPS results on the default scenario (Internet2 1Gbp
 11. Results for various experiments get stored in specific directories in ns-allinone-2.35/ns-2.35/tcl/ex/ups/
 
 
-The scripts and results directories for various experiments are listed below. Specific details about result format can be found in the README files in the specific result directory.
+The scripts and results directories for various experiments are listed below. Specific details about result format can be found in the README files in the specific result directory. The total time taken to run each script (on a machine with 2.6GHz processor and atleast 5GB memory) has also been reported.
 
 #### LSTF replay for Random, FIFO, LIFO and FQ
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/replay-internet2-1Gbps-10Gbps.sh
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/replay-results
+- Time taken: 2-3hrs 
 
 #### Mean FCTs
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/meanfcts-tcp-internet2-1Gbps-10Gbps.sh
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/meanfcts-results
+- Time taken: 11-12hrs 
 
 #### Tail Packet Delays
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/tail-pkt-delays-internet2-1Gbps-10Gbps.sh
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/tail-pkt-delays-results
+- Time taken: 9-10hrs 
 
 #### Long-lived fairness
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-longlived-internet2-10Gbps-10Gbps.sh
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/longlived/
+- Time taken: 9-10mins
 
 #### Short-term fairness
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-shortterm-internet2-1Gbps-10Gbps.sh  
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/shortterm/
+- Time taken: > 24hrs
 
 #### AQM: FQ-CoDel
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fqcodel-internet2-1Gbps-10Gbps.sh
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fqcodel-results/
+- Time taken: 8-9hrs
 
 Please contact me at radhika @ eecs dot berkeley dot edu
 - if you would like to run experiments under more scenarios as done in the paper. I can send you the required workloads and topologies, along with further instructions.
