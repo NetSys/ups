@@ -41,7 +41,7 @@ The scripts and results directories for various experiments are listed below. Sp
 #### Short-term fairness
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-shortterm-internet2-1Gbps-10Gbps.sh  
 - Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/shortterm/
-- Time taken: > 24hrs
+- Time taken: 18-19hrs
 
 #### AQM: FQ-CoDel
 - Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fqcodel-internet2-1Gbps-10Gbps.sh
