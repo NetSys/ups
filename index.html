@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Universal Packet Scheduling by NetSys</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Universal Packet Scheduling</h1>
+        <p class="header"></p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/NetSys/ups/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/NetSys/ups/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/NetSys/ups">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/NetSys">NetSys</a></p>
+
+
+      </header>
+      <section>
+        <h2>
+<a id="reproducing-ups-results-for-the-default-scenario" class="anchor" href="#reproducing-ups-results-for-the-default-scenario" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reproducing UPS Results for the default scenario</h2>
+
+<p>Instructions for reproducing UPS results on the default scenario (Internet2 1Gbps-10Gbps topology, 70% link utilization)</p>
+
+<h4>
+<a id="general" class="anchor" href="#general" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>General:</h4>
+
+<ol>
+<li>Clone the UPS repository.</li>
+<li>cd ns-allinone-2.35</li>
+<li>sudo apt-get install xorg-dev (if needed)</li>
+<li>sudo apt-get install gcc-4.4 g++-4.4 (if needed)</li>
+<li>export CC=gcc-4.4 CXX=g++-4.4</li>
+<li>./install</li>
+<li>cd ns-2.35</li>
+<li>Open Makefile and replace "queue/sfq.o queue/fq.o queue/drr.o queue/srr.o queue/cbq.o" with "queue/sfq.o queue/fq.o queue/drr.o queue/srr.o queue/cbq.o queue/sfqcodel.o queue/random-dequeue.o queue/lifo.o queue/lstf.o queue/edge-replay.o queue/edge-tail-pkt-delay-lstf.o queue/fine-priorities.o queue/srpt.o queue/edge-fq-lstf.o"</li>
+<li>make clean; make </li>
+<li>Scripts to run various experiments can be found in ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts. All scripts should be run from this directory.</li>
+<li>Results for various experiments get stored in specific directories in ns-allinone-2.35/ns-2.35/tcl/ex/ups/</li>
+</ol>
+
+<p>The scripts and results directories for various experiments are listed below. Specific details about result format can be found in the README files in the specific result directory. The total time taken to run each script (on a machine with 2.6GHz processor and atleast 5GB memory) has also been reported.</p>
+
+<h4>
+<a id="lstf-replay-for-random-fifo-lifo-and-fq" class="anchor" href="#lstf-replay-for-random-fifo-lifo-and-fq" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>LSTF replay for Random, FIFO, LIFO and FQ</h4>
+
+<ul>
+<li>Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/replay-internet2-1Gbps-10Gbps.sh</li>
+<li>Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/replay-results</li>
+<li>Time taken: 2-3hrs </li>
+</ul>
+
+<h4>
+<a id="mean-fcts" class="anchor" href="#mean-fcts" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Mean FCTs</h4>
+
+<ul>
+<li>Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/meanfcts-tcp-internet2-1Gbps-10Gbps.sh</li>
+<li>Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/meanfcts-results</li>
+<li>Time taken: 11-12hrs </li>
+</ul>
+
+<h4>
+<a id="tail-packet-delays" class="anchor" href="#tail-packet-delays" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tail Packet Delays</h4>
+
+<ul>
+<li>Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/tail-pkt-delays-internet2-1Gbps-10Gbps.sh</li>
+<li>Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/tail-pkt-delays-results</li>
+<li>Time taken: 9-10hrs </li>
+</ul>
+
+<h4>
+<a id="long-lived-fairness" class="anchor" href="#long-lived-fairness" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Long-lived fairness</h4>
+
+<ul>
+<li>Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-longlived-internet2-10Gbps-10Gbps.sh</li>
+<li>Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/longlived/</li>
+<li>Time taken: 9-10mins</li>
+</ul>
+
+<h4>
+<a id="short-term-fairness" class="anchor" href="#short-term-fairness" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Short-term fairness</h4>
+
+<ul>
+<li>Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fairness-shortterm-internet2-1Gbps-10Gbps.sh<br>
+</li>
+<li>Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fairness-results/shortterm/</li>
+<li>Time taken: 18-19hrs</li>
+</ul>
+
+<h4>
+<a id="aqm-fq-codel" class="anchor" href="#aqm-fq-codel" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>AQM: FQ-CoDel</h4>
+
+<ul>
+<li>Script: ns-allinone-2.35/ns-2.35/tcl/ex/ups/scripts/fqcodel-internet2-1Gbps-10Gbps.sh</li>
+<li>Results directory: ns-allinone-2.35/ns-2.35/tcl/ex/ups/fqcodel-results/</li>
+<li>Time taken: 8-9hrs</li>
+</ul>
+
+<p>Please contact me at radhika @ eecs dot berkeley dot edu</p>
+
+<ul>
+<li>if you would like to run experiments under more scenarios as done in the paper. I can send you the required workloads and topologies, along with further instructions.</li>
+<li>if you happen to find a bug!</li>
+<li>if you have any other questions</li>
+</ul>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
