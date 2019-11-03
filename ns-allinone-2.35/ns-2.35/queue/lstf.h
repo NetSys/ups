@@ -15,7 +15,7 @@
 #include "fstream"
 
 #define DEBUG 1
-
+#define LSTF_NUM_QUEUES 8
 
 struct bindesc {
         PacketQueue *q_;        // underlying FIFO queue
@@ -28,13 +28,13 @@ class LstfQueue : public Queue {
     LstfQueue();
 
   protected:
-    void insertPacketinSortedQueue(Packet* pkt);
     void enque(Packet* pkt);
     int dropPacket(int pr);
     double txtime(Packet* p);
     Packet* deque();
    
-    bindesc bin_[2];
+    bindesc bin_[1 + LSTF_NUM_QUEUES];
+    long int q_bounds_[1 + LSTF_NUM_QUEUES];
 
     int curlen_;	    // the total occupancy of all bins in packets
     int debug_;
