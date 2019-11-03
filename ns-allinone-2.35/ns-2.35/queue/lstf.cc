@@ -30,8 +30,13 @@ LstfQueue::LstfQueue() :  queueid_(-1), tchan_(0)
     bind("control_packets_", &control_packets_);
     bind("control_packets_time_", &control_packets_time_);
     bind("bandwidth_", &bandwidth_);
+    char name[100];
+    for (int i = 0; i < LSTF_NUM_QUEUES; i++) {
+      sprintf(name, "queue_bounds_%d", i);
+      bind(name, &q_bounds_[i+1]);
+    }
 
-    for(int i=0; i<2; i++) {
+    for(int i=0; i<=LSTF_NUM_QUEUES; i++) {
      bin_[i].q_ = new PacketQueue();
      bin_[i].index = i;
     }
@@ -53,61 +58,28 @@ void LstfQueue::reset()
 double LstfQueue::txtime(Packet* p) {
   return (8. * hdr_cmn::access(p)->size() / bandwidth_);
 }
-                
-void LstfQueue::insertPacketinSortedQueue(Packet* pkt) {
-
-  hdr_ip *iph = hdr_ip::access(pkt);
-  long long int curSlack = iph->prio() + (long long int)(txtime(pkt) * kTime_);
-
-  for(Packet *pp= 0, *p= (bin_[1].q_)->head(); p; pp= p, p= p->next_) {
-    hdr_ip *tempIph = hdr_ip::access(p);
-    long long int slack = tempIph->prio() - ((Scheduler::instance().clock()*kTime_) - (long long int)(HDR_CMN(p)->ts_*kTime_)) + (long long int)(txtime(p) * kTime_);
-    if(slack > curSlack) {
-      if (p == (bin_[1].q_)->head()) {
-        (bin_[1].q_)->enqueHead(pkt);
-      }
-      else {
-        (bin_[1].q_)->enqueAfterPkt(pkt, pp);
-      }
-      return;
-    }
-  }
-
-  (bin_[1].q_)->enque(pkt);
-
-}
-
-
-
 
 // Add a new packet to the queue. If the entire buffer space is full, drop highest slack packet
 void LstfQueue::enque(Packet* pkt)
 {
         hdr_ip *iph = hdr_ip::access(pkt);
         int seqNo = getSeqNo(pkt);
+        long long int curSlack = iph->prio() + (long long int)(txtime(pkt) * kTime_);
 
-  	// check for full buffer
+  	// Drop a packet from the lowest priority queue if the buffer is full.
 	if(curlen_ >= qlim_) {
-               if((bin_[1].q_)->tail() == 0) {
-                 drop(pkt);
-                 return;
-               } 
-               Packet* tail_pkt = (bin_[1].q_)->tail();
-               hdr_ip *tail_pkt_iph = hdr_ip::access(tail_pkt);
-               int tail_pkt_seqNo = getSeqNo(tail_pkt);
-               long long int tail_pkt_slack = tail_pkt_iph->prio() - ((Scheduler::instance().clock()*kTime_) - 
-                                      (long long int)(HDR_CMN(tail_pkt)->ts_*kTime_)) + (long long int)(txtime(tail_pkt) * kTime_);
-               if(iph->prio() + (long long int)(txtime(pkt) * kTime_) > tail_pkt_slack) {
-                 drop(pkt);
-                 return;
-               }
-               if (debug_)
-                  printf("%lf: Lstf: QueueID %d: Dropped packet with id %d and sequence %d\n", 
-                               Scheduler::instance().clock(), queueid_, tail_pkt_iph->flowid(), tail_pkt_seqNo);
-               (bin_[1].q_)->remove(tail_pkt);
-               curq_ -= HDR_CMN(tail_pkt)->size();
-               curlen_--; 
-               drop(tail_pkt);
+	       for (int i = LSTF_NUM_QUEUES; i >= 1; i--) {
+		   if (curSlack > q_bounds_[i]) {
+			   drop(pkt);
+			   return;
+		   }
+		   if ((bin_[i].q_)->length() == 0) continue;
+                   Packet* tail_pkt = (bin_[i].q_)->tail();
+                   (bin_[i].q_)->remove(tail_pkt);
+                   curq_ -= HDR_CMN(tail_pkt)->size();
+                   curlen_--; 
+                   drop(tail_pkt);
+	       }
         }
 	curlen_++;
 	curq_ += HDR_CMN(pkt)->size();
@@ -116,7 +88,9 @@ void LstfQueue::enque(Packet* pkt)
         if((HDR_CMN(pkt)->size() >= 1460) || (!control_packets_)|| (Scheduler::instance().clock() >= double(control_packets_time_))) {
 	
 	    HDR_CMN(pkt)->ts_ = Scheduler::instance().clock();
-	    insertPacketinSortedQueue(pkt);
+	    for (int i = 1; i <= LSTF_NUM_QUEUES; i++) {
+		    if (curSlack < q_bounds_[i]) (bin_[i].q_)->enque(pkt);
+	    }
 
 	    if(debug_)
         	printf("%lf: Lstf: QueueID %d: Enqueuing packet from flow with id %d, seqno = %d, size = %d and slack = %lld \n", Scheduler::instance().clock(), queueid_, iph->flowid(), seqNo, HDR_CMN(pkt)->size(), iph->prio()); 
@@ -149,26 +123,28 @@ Packet* LstfQueue::deque()
                 printf("%lf: Lstf: QueueID %d: Dequing packet from flow with id %d, slack %lld, seqno = %d, size = %d from control queue\n", Scheduler::instance().clock(), queueid_, iph->flowid(), iph->prio(), seqNo, HDR_CMN(pkt)->size()); 
 	      return pkt;
             } 
-            while((bin_[1].q_)->length() > 0) {
-                //if control queue empty, work on data queue
-		Packet *pkt;
-		pkt = (bin_[1].q_)->deque();
-        	int seqNo = getSeqNo(pkt);
-        	hdr_ip *iph = hdr_ip::access(pkt);
-                curlen_--;
-                curq_ -= HDR_CMN(pkt)->size();
-		
+	    for (int i = LSTF_NUM_QUEUES; i >= 1; i--) {
+                  if ((bin_[i].q_)->length() > 0) {
+                      //if control queue empty, work on data queue
+	              Packet *pkt;
+	              pkt = (bin_[i].q_)->deque();
+                      int seqNo = getSeqNo(pkt);
+                      hdr_ip *iph = hdr_ip::access(pkt);
+                      curlen_--;
+                      curq_ -= HDR_CMN(pkt)->size();
+	              
 	
-		long long int wait_time = (Scheduler::instance().clock() * kTime_) - (long long int)(HDR_CMN(pkt)->ts_*kTime_);
-		long long int new_slack = iph->prio() - wait_time;
-                	
-		iph->prio() = new_slack;
+	              long long int wait_time = (Scheduler::instance().clock() * kTime_) - (long long int)(HDR_CMN(pkt)->ts_*kTime_);
+	              long long int new_slack = iph->prio() - wait_time;
+                      	
+	              iph->prio() = new_slack;
 
-		if(debug_)
-        		printf("%lf: Lstf: QueueID %d: Dequing packet from flow with id %d, slack %lld, seqno = %d, size = %d \n", Scheduler::instance().clock(), queueid_, iph->flowid(), iph->prio(), seqNo, HDR_CMN(pkt)->size()); 
+	              if(debug_)
+                      	printf("%lf: Lstf: QueueID %d: Dequing packet from flow with id %d, slack %lld, seqno = %d, size = %d \n", Scheduler::instance().clock(), queueid_, iph->flowid(), iph->prio(), seqNo, HDR_CMN(pkt)->size()); 
 
-		return pkt;
-            }
+	              return pkt;
+                  }
+	    }
 	}
        	return 0;
 }
