@@ -123,7 +123,7 @@ Packet* LstfQueue::deque()
                 printf("%lf: Lstf: QueueID %d: Dequing packet from flow with id %d, slack %lld, seqno = %d, size = %d from control queue\n", Scheduler::instance().clock(), queueid_, iph->flowid(), iph->prio(), seqNo, HDR_CMN(pkt)->size()); 
 	      return pkt;
             } 
-	    for (int i = LSTF_NUM_QUEUES; i >= 1; i--) {
+	    for (int i = 1; i <= LSTF_NUM_QUEUES; i--) {
                   if ((bin_[i].q_)->length() > 0) {
                       //if control queue empty, work on data queue
 	              Packet *pkt;
